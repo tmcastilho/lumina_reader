@@ -1,0 +1,3091 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>Lumina Reader - Estilo Moon+ Reader (EPUB & PDF)</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts para Leitura Confortável -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Literata:ital,opsz,wght@0,7..72,300..800;1,7..72,300..800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
+
+  <!-- KaTeX para Fórmulas Matemáticas Impecáveis -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <!-- JSZip para descompactar e ler arquivos .EPUB -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- PDF.js para leitura e renderização de arquivos .PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- Font Awesome para Ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Estante de Madeira Clara Estilo Clássico iBooks (Carvalho Quente Iluminado) */
+    .wood-shelf-bg {
+      background-color: #c69c6d;
+      background-image:
+        /* Vinheta suave nas bordas para profundidade de nicho */
+        linear-gradient(90deg, rgba(65, 38, 14, 0.42) 0%, rgba(65, 38, 14, 0.08) 4%, transparent 12%, transparent 88%, rgba(65, 38, 14, 0.08) 96%, rgba(65, 38, 14, 0.42) 100%),
+        /* Luz ambiente quente central */
+        radial-gradient(ellipse at 50% 25%, rgba(255, 240, 212, 0.35), rgba(139, 90, 43, 0.25) 85%),
+        /* Veios verticais sutis da madeira de carvalho */
+        repeating-linear-gradient(90deg, rgba(92, 56, 24, 0.04) 0px, rgba(92, 56, 24, 0.04) 1px, transparent 1px, transparent 14px, rgba(255, 235, 205, 0.05) 14px, rgba(255, 235, 205, 0.05) 16px, transparent 16px, transparent 34px),
+        linear-gradient(180deg, #cfa678 0%, #bd8e5b 50%, #b07f4c 100%);
+    }
+
+    /* Molduras laterais da estante (pilastras de madeira) */
+    .wood-side-frame {
+      box-shadow:
+        inset 14px 0 18px -8px rgba(58, 32, 10, 0.55),
+        inset -14px 0 18px -8px rgba(58, 32, 10, 0.55);
+    }
+
+    /* Cabeçalho em Madeira Clara com Botões Táteis */
+    .ibooks-wood-header {
+      background: linear-gradient(180deg, #e5c399 0%, #d2a673 48%, #c1915b 52%, #b5834c 100%);
+      border-bottom: 2px solid #7c5024;
+      box-shadow:
+        0 4px 12px rgba(48, 26, 8, 0.45),
+        inset 0 1px 0 rgba(255, 248, 235, 0.65);
+    }
+
+    .ibooks-wood-btn {
+      background: linear-gradient(180deg, #cfa26e 0%, #b38049 50%, #a26f39 100%);
+      border: 1px solid #754a20;
+      box-shadow:
+        0 1px 0 rgba(255, 244, 224, 0.45),
+        inset 0 1px 1px rgba(255, 245, 228, 0.4);
+      color: #fffaf0;
+      text-shadow: 0 -1px 1px rgba(68, 38, 12, 0.75);
+    }
+    .ibooks-wood-btn:hover {
+      background: linear-gradient(180deg, #d9ae7b 0%, #be8b54 50%, #ad7942 100%);
+    }
+    .ibooks-wood-btn:active {
+      background: linear-gradient(180deg, #9a6834 0%, #ad7942 100%);
+      box-shadow: inset 0 2px 4px rgba(45, 22, 5, 0.6);
+    }
+
+    /* Prateleira Chanfrada Realista Estilo iBooks */
+    .wooden-plank {
+      position: relative;
+      height: 24px;
+      margin-left: -1rem;
+      margin-right: -1rem;
+      /* Superfície superior chanfrada + borda frontal iluminada */
+      background: linear-gradient(180deg,
+        #e7c79e 0%,
+        #d8b080 28%,
+        #eccfa7 34%,
+        #cfa16d 42%,
+        #ba8852 82%,
+        #8e5d2c 100%
+      );
+      border-top: 1px solid rgba(110, 68, 28, 0.45);
+      border-bottom: 2px solid #6b421b;
+      box-shadow:
+        0 14px 18px -2px rgba(46, 24, 6, 0.58),
+        0 5px 8px -1px rgba(46, 24, 6, 0.42),
+        inset 0 1px 0 rgba(255, 249, 238, 0.65);
+    }
+    @media (min-width: 640px) {
+      .wooden-plank {
+        margin-left: -2.5rem;
+        margin-right: -2.5rem;
+      }
+    }
+
+    /* Sombra ambiente do fundo do nicho logo acima da prateleira */
+    .wooden-plank::before {
+      content: '';
+      position: absolute;
+      top: -18px;
+      left: 0;
+      right: 0;
+      height: 18px;
+      background: linear-gradient(180deg, transparent 0%, rgba(58, 31, 9, 0.26) 100%);
+      pointer-events: none;
+    }
+
+    /* Efeito de Capa de Livro Apoiada na Prateleira (Proporção Real + Sombra na Madeira) */
+    .book-card {
+      transform-style: preserve-3d;
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
+      box-shadow:
+        0 4px 6px -1px rgba(38, 19, 4, 0.65),
+        -3px 4px 10px rgba(38, 19, 4, 0.45),
+        2px 0 4px rgba(38, 19, 4, 0.25),
+        inset 1px 1px 1px rgba(255, 255, 255, 0.35);
+    }
+    .book-card:hover {
+      transform: translateY(-6px) scale(1.03);
+      box-shadow:
+        0 14px 20px -2px rgba(38, 19, 4, 0.72),
+        -4px 8px 14px rgba(38, 19, 4, 0.45),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.45);
+    }
+    .book-card:active {
+      transform: translateY(-2px) scale(0.99);
+    }
+
+    /* Lombada e vinco realista de capa dura/brochura */
+    .book-spine-effect {
+      background: linear-gradient(to right,
+        rgba(255,255,255,0.28) 0%,
+        rgba(0,0,0,0.28) 4%,
+        rgba(255,255,255,0.22) 8%,
+        rgba(0,0,0,0.14) 12%,
+        transparent 18%
+      );
+    }
+
+    /* Temas Moon+ Reader */
+    :root {
+      --theme-bg: #f5eedc;
+      --theme-text: #2c251e;
+      --theme-surface: #eae0cb;
+      --theme-accent: #b45309;
+      --theme-border: #d8cbb3;
+      --theme-shadow: rgba(0, 0, 0, 0.12);
+      --book-gutter: linear-gradient(to right, rgba(0,0,0,0.14) 0%, rgba(0,0,0,0.02) 10%, rgba(255,255,255,0.05) 50%, rgba(0,0,0,0.02) 90%, rgba(0,0,0,0.14) 100%);
+    }
+
+    body[data-theme="sepia"] {
+      --theme-bg: #f4ecd8;
+      --theme-text: #3c2f23;
+      --theme-surface: #e8dcbf;
+      --theme-accent: #92400e;
+      --theme-border: #d4c4a2;
+      --theme-shadow: rgba(60, 47, 35, 0.15);
+      --book-gutter: linear-gradient(to right, rgba(60,47,35,0.15) 0%, transparent 12%, rgba(255,255,255,0.1) 50%, transparent 88%, rgba(60,47,35,0.15) 100%);
+    }
+
+    body[data-theme="light"] {
+      --theme-bg: #fbfbfc;
+      --theme-text: #1f2937;
+      --theme-surface: #f3f4f6;
+      --theme-accent: #2563eb;
+      --theme-border: #e5e7eb;
+      --theme-shadow: rgba(0, 0, 0, 0.08);
+      --book-gutter: linear-gradient(to right, rgba(0,0,0,0.08) 0%, transparent 10%, rgba(255,255,255,0.4) 50%, transparent 90%, rgba(0,0,0,0.08) 100%);
+    }
+
+    body[data-theme="dark"] {
+      --theme-bg: #121212;
+      --theme-text: #dedede;
+      --theme-surface: #1e1e1e;
+      --theme-accent: #38bdf8;
+      --theme-border: #2d2d2d;
+      --theme-shadow: rgba(0, 0, 0, 0.6);
+      --book-gutter: linear-gradient(to right, rgba(0,0,0,0.5) 0%, transparent 10%, rgba(255,255,255,0.03) 50%, transparent 90%, rgba(0,0,0,0.5) 100%);
+    }
+
+    body[data-theme="warm"] {
+      --theme-bg: #221a15;
+      --theme-text: #ebd5b3;
+      --theme-surface: #2e221b;
+      --theme-accent: #f97316;
+      --theme-border: #423226;
+      --theme-shadow: rgba(0, 0, 0, 0.5);
+      --book-gutter: linear-gradient(to right, rgba(0,0,0,0.6) 0%, transparent 12%, rgba(255,255,255,0.02) 50%, transparent 88%, rgba(0,0,0,0.6) 100%);
+    }
+
+    body {
+      background-color: var(--theme-bg);
+      color: var(--theme-text);
+      touch-action: pan-y;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    /* Container de Flip 3D Estilo Livro */
+    .book-viewport {
+      perspective: 2600px;
+      transform-style: preserve-3d;
+    }
+
+    .book-sheet {
+      position: relative;
+      box-shadow: -4px 0 25px var(--theme-shadow);
+      transform-style: preserve-3d;
+    }
+
+    /* Camada de Folha de Papel Realista (Overlay Animado) */
+    .paper-flip-leaf {
+      position: absolute;
+      inset: 0;
+      z-index: 25;
+      background-color: var(--theme-bg);
+      color: var(--theme-text);
+      border-radius: inherit;
+      overflow: hidden;
+      pointer-events: none;
+      backface-visibility: hidden;
+      will-change: transform, box-shadow;
+    }
+
+    /* Sombra dinâmica na dobra do papel e no verso */
+    .paper-flip-leaf::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.48s ease;
+    }
+
+    /* Avançar página (1 página): folha inteira dobra para a esquerda */
+    .paper-flip-leaf.flip-forward {
+      transform-origin: left center;
+      animation: paperTurnForward 0.52s cubic-bezier(0.22, 0.85, 0.35, 1) forwards;
+    }
+    .paper-flip-leaf.flip-forward::after {
+      background: linear-gradient(to left, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.08) 25%, rgba(255, 255, 255, 0.12) 60%, transparent 100%);
+      opacity: 1;
+    }
+
+    /* Voltar página (1 página): folha anterior vem da esquerda e assenta sobre a atual */
+    .paper-flip-leaf.flip-backward {
+      transform-origin: left center;
+      animation: paperTurnBackward 0.52s cubic-bezier(0.22, 0.85, 0.35, 1) forwards;
+    }
+    .paper-flip-leaf.flip-backward::after {
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.05) 0%, rgba(255, 255, 255, 0.14) 40%, rgba(0, 0, 0, 0.26) 100%);
+      animation: shadowFadeOut 0.52s ease forwards;
+    }
+
+    /* ===== FÍSICA REAL DE LIVRO ABERTO (2 PÁGINAS - EIXO NA LOMBADA CENTRAL) ===== */
+    /* Avançar em 2 páginas: apenas a folha DIREITA dobra sobre a lombada central para a esquerda */
+    .paper-flip-leaf.spread-flip-forward {
+      left: 50%;
+      right: 0;
+      width: 50%;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      transform-origin: left center;
+      animation: spreadTurnRightToLeft 0.52s cubic-bezier(0.22, 0.85, 0.35, 1) forwards;
+    }
+    .paper-flip-leaf.spread-flip-forward::after {
+      background: linear-gradient(to left, rgba(0, 0, 0, 0.32) 0%, rgba(0, 0, 0, 0.08) 35%, rgba(255, 255, 255, 0.16) 75%, rgba(0, 0, 0, 0.12) 100%);
+      opacity: 1;
+    }
+
+    /* Voltar em 2 páginas: apenas a folha ESQUERDA dobra sobre a lombada central para a direita */
+    .paper-flip-leaf.spread-flip-backward {
+      left: 0;
+      right: 50%;
+      width: 50%;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      transform-origin: right center;
+      animation: spreadTurnLeftToRight 0.52s cubic-bezier(0.22, 0.85, 0.35, 1) forwards;
+    }
+    .paper-flip-leaf.spread-flip-backward::after {
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.32) 0%, rgba(0, 0, 0, 0.08) 35%, rgba(255, 255, 255, 0.16) 75%, rgba(0, 0, 0, 0.12) 100%);
+      opacity: 1;
+    }
+
+    @keyframes spreadTurnRightToLeft {
+      0% {
+        transform: rotateY(0deg) skewY(0deg);
+        box-shadow: -4px 0 12px rgba(0, 0, 0, 0.12);
+      }
+      45% {
+        transform: rotateY(-78deg) skewY(-2deg);
+        box-shadow: -18px 8px 30px rgba(0, 0, 0, 0.35);
+      }
+      100% {
+        transform: rotateY(-165deg) skewY(-1deg);
+        box-shadow: -24px 10px 36px rgba(0, 0, 0, 0.25);
+        opacity: 0;
+      }
+    }
+
+    @keyframes spreadTurnLeftToRight {
+      0% {
+        transform: rotateY(0deg) skewY(0deg);
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.12);
+      }
+      45% {
+        transform: rotateY(78deg) skewY(2deg);
+        box-shadow: 18px 8px 30px rgba(0, 0, 0, 0.35);
+      }
+      100% {
+        transform: rotateY(165deg) skewY(1deg);
+        box-shadow: 24px 10px 36px rgba(0, 0, 0, 0.25);
+        opacity: 0;
+      }
+    }
+
+    /* Sombra projetada sobre a folha de baixo durante a passagem do papel */
+    .under-page-shadow {
+      position: absolute;
+      inset: 0;
+      z-index: 15;
+      pointer-events: none;
+      opacity: 0;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.32) 0%, rgba(0, 0, 0, 0.1) 35%, transparent 75%);
+    }
+    .under-page-shadow.active-forward {
+      animation: underShadowForward 0.52s ease forwards;
+    }
+    .under-page-shadow.active-backward {
+      animation: underShadowBackward 0.52s ease forwards;
+    }
+    .under-page-shadow.spread-shadow-right {
+      left: 50%;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.08) 45%, transparent 85%);
+      animation: underShadowForward 0.52s ease forwards;
+    }
+    .under-page-shadow.spread-shadow-left {
+      right: 50%;
+      background: linear-gradient(to left, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.08) 45%, transparent 85%);
+      animation: underShadowForward 0.52s ease forwards;
+    }
+    .under-page-shadow.active-backward {
+      animation: underShadowBackward 0.52s ease forwards;
+    }
+
+    @keyframes paperTurnForward {
+      0% {
+        transform: rotateY(0deg) skewY(0deg);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      35% {
+        transform: rotateY(-38deg) skewY(-1.8deg) scaleX(0.98);
+        box-shadow: 18px 8px 32px rgba(0, 0, 0, 0.32);
+      }
+      100% {
+        transform: rotateY(-105deg) skewY(-3deg) scaleX(0.94);
+        box-shadow: 28px 12px 40px rgba(0, 0, 0, 0.45);
+        opacity: 0;
+      }
+    }
+
+    @keyframes paperTurnBackward {
+      0% {
+        transform: rotateY(-105deg) skewY(-3deg) scaleX(0.94);
+        box-shadow: 28px 12px 40px rgba(0, 0, 0, 0.45);
+        opacity: 0.2;
+      }
+      60% {
+        transform: rotateY(-28deg) skewY(-1.4deg) scaleX(0.985);
+        box-shadow: 16px 6px 28px rgba(0, 0, 0, 0.28);
+        opacity: 1;
+      }
+      100% {
+        transform: rotateY(0deg) skewY(0deg) scaleX(1);
+        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes shadowFadeOut {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes underShadowForward {
+      0% { opacity: 0.85; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes underShadowBackward {
+      0% { opacity: 0; }
+      70% { opacity: 0.75; }
+      100% { opacity: 0; }
+    }
+
+    /* Lombada central sutil de livro */
+    .book-gutter-effect {
+      background: var(--book-gutter);
+      pointer-events: none;
+    }
+
+    /* Vinco central realista quando em Modo Livro Aberto (2 páginas) */
+    .book-center-crease {
+      background: linear-gradient(
+        to right,
+        transparent 0%,
+        transparent calc(50% - 28px),
+        rgba(0, 0, 0, 0.04) calc(50% - 14px),
+        rgba(0, 0, 0, 0.16) calc(50% - 2px),
+        rgba(0, 0, 0, 0.28) 50%,
+        rgba(255, 255, 255, 0.14) calc(50% + 2px),
+        rgba(0, 0, 0, 0.06) calc(50% + 14px),
+        transparent calc(50% + 28px),
+        transparent 100%
+      );
+      pointer-events: none;
+    }
+
+    /* Paginação Real por Colunas (Zero corte vertical, 100% ajustado à tela) */
+    #paginatedViewport {
+      overflow: hidden;
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    #readerContent {
+      height: 100%;
+      overflow: visible;
+      column-fill: auto;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      box-sizing: border-box;
+    }
+
+    #readerContent p,
+    #readerContent div,
+    #readerContent blockquote,
+    #readerContent li {
+      break-inside: avoid-column;
+    }
+
+    #readerContent h1,
+    #readerContent h2,
+    #readerContent h3,
+    #readerContent h4 {
+      break-after: avoid-column;
+      break-inside: avoid-column;
+    }
+
+    /* Proteção contra quebra de fórmulas matemáticas */
+    .katex-display {
+      margin: 1.25em 0 !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      padding: 0.6em 0 !important;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 6px;
+    }
+    .katex-display::-webkit-scrollbar {
+      height: 4px;
+    }
+    .katex-display::-webkit-scrollbar-thumb {
+      background: var(--theme-accent);
+      border-radius: 4px;
+    }
+    .katex {
+      white-space: nowrap;
+      text-indent: 0;
+    }
+
+    /* Imagens e conteúdo interno de EPUB */
+    #readerContent img {
+      max-width: 100%;
+      height: auto;
+      margin: 1rem auto;
+      border-radius: 6px;
+      display: block;
+    }
+    #readerContent svg {
+      max-width: 100%;
+      height: auto;
+      margin: 0.5rem auto;
+    }
+
+    /* Destaques (Highlight) */
+    .hl-yellow {
+      background: rgba(250, 204, 21, 0.48);
+      border-bottom: 2px solid #eab308;
+      border-radius: 2px;
+      padding: 0 2px;
+      cursor: pointer;
+    }
+    .hl-green {
+      background: rgba(74, 222, 128, 0.45);
+      border-bottom: 2px solid #22c55e;
+      border-radius: 2px;
+      padding: 0 2px;
+      cursor: pointer;
+    }
+    .hl-pink {
+      background: rgba(244, 114, 182, 0.45);
+      border-bottom: 2px solid #ec4899;
+      border-radius: 2px;
+      padding: 0 2px;
+      cursor: pointer;
+    }
+    .hl-blue {
+      background: rgba(96, 165, 250, 0.45);
+      border-bottom: 2px solid #3b82f6;
+      border-radius: 2px;
+      padding: 0 2px;
+      cursor: pointer;
+    }
+
+    /* Marcador Ribbon / Fita no canto */
+    .ribbon-bookmark {
+      width: 24px;
+      height: 38px;
+      background: #dc2626;
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+    }
+    .ribbon-bookmark.inactive {
+      opacity: 0.25;
+      transform: translateY(-8px);
+    }
+    .ribbon-bookmark.active {
+      opacity: 1;
+      transform: translateY(0);
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4));
+    }
+
+    /* Utilitários customizados */
+    .transition-ui {
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    /* Filtro de tema em modo PDF visual */
+    body[data-theme="dark"] .pdf-canvas-themed {
+      filter: invert(0.88) hue-rotate(180deg);
+    }
+    body[data-theme="sepia"] .pdf-canvas-themed {
+      filter: sepia(0.28) contrast(0.96);
+    }
+    body[data-theme="warm"] .pdf-canvas-themed {
+      filter: invert(0.86) sepia(0.35) hue-rotate(180deg);
+    }
+  </style>
+</head>
+<body data-theme="sepia" class="h-screen w-screen overflow-hidden flex flex-col font-['Literata'] select-none">
+
+  <!-- ================= TELA 1: ESTANTE DE MADEIRA CLÁSSICA (ESTILO IBOOKS) ================= -->
+  <div id="bookshelfView" class="fixed inset-0 z-30 flex flex-col wood-shelf-bg wood-side-frame select-none transition-opacity duration-300">
+    
+    <!-- Barra Superior em Madeira Clara Entalhada -->
+    <header class="ibooks-wood-header px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2 z-40">
+      <div class="flex items-center gap-2">
+        <!-- Botão Importar à Esquerda (estilo botão "Store / Adicionar" do topo) -->
+        <button id="btnOpenAddBook" class="ibooks-wood-btn flex items-center gap-1.5 font-semibold text-xs px-3 py-1.5 rounded-md transition">
+          <i class="fa-solid fa-plus text-xs"></i>
+          <span>Adicionar</span>
+        </button>
+
+        <!-- Filtro de Ordenação estilo "Collections" -->
+        <select id="shelfSortSelect" class="ibooks-wood-btn text-xs font-semibold py-1.5 px-2.5 rounded-md outline-none cursor-pointer">
+          <option value="recent" class="bg-[#8e5d2c] text-white">Recentes</option>
+          <option value="progress" class="bg-[#8e5d2c] text-white">Mais Lidos</option>
+          <option value="title" class="bg-[#8e5d2c] text-white">Título (A-Z)</option>
+        </select>
+      </div>
+
+      <!-- Título Central Entalhado na Madeira -->
+      <div class="hidden md:flex items-center gap-2">
+        <h1 class="text-[#4a2b0f] font-extrabold tracking-tight text-xl drop-shadow-[0_1px_0_rgba(255,248,235,0.65)] font-sans">
+          Livros
+        </h1>
+      </div>
+
+      <!-- Busca Rápida à Direita -->
+      <div class="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
+        <div class="relative w-full max-w-[170px] sm:max-w-[210px]">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[#6b421b]/70 text-xs"></i>
+          <input type="text" id="shelfSearchInput" placeholder="Buscar na estante..." 
+                 class="w-full pl-8 pr-3 py-1.5 text-xs rounded-full bg-[#fffaf0]/85 text-[#3d230a] placeholder-[#7c5024]/60 border border-[#8e5d2c] shadow-inner focus:bg-white focus:border-[#5c3612] outline-none transition">
+        </div>
+      </div>
+    </header>
+
+    <!-- Área Rolável com as Prateleiras de Madeira (Suporta Drag & Drop de arquivos!) -->
+    <main id="shelfScrollArea" class="flex-1 overflow-y-auto px-4 sm:px-10 pt-5 pb-8 relative">
+      <!-- Aviso visual ao arrastar arquivo para a estante -->
+      <div id="dropZoneOverlay" class="hidden fixed inset-0 z-50 bg-[#3d230a]/80 backdrop-blur-sm border-4 border-dashed border-[#f3d4a8] m-4 rounded-3xl flex flex-col items-center justify-center text-[#fffaf0] pointer-events-none">
+        <i class="fa-solid fa-file-import text-5xl text-[#f3d4a8] mb-3 animate-bounce"></i>
+        <p class="text-lg font-bold">Solte seu EPUB, PDF, HTML ou TXT aqui!</p>
+        <p class="text-xs text-[#f3d4a8]/80 mt-1">Ele será colocado imediatamente na prateleira</p>
+      </div>
+
+      <div id="shelvesContainer" class="max-w-6xl mx-auto space-y-6">
+        <!-- Renderizado dinamicamente via JS com prateleiras e livros -->
+      </div>
+    </main>
+
+    <!-- Rodapé Discreto em Madeira -->
+    <footer class="bg-[#a87743] border-t border-[#7c5024] px-4 py-1.5 text-[#3d230a] font-semibold text-xs flex justify-between items-center shadow-inner">
+      <span id="shelfBooksCount">0 livros guardados</span>
+      <span class="text-[11px] opacity-85"><i class="fa-solid fa-book-open mr-1"></i>EPUB • PDF • HTML • TXT</span>
+    </footer>
+  </div>
+
+  <!-- ================= TELA 2: VISUALIZADOR DE LEITURA (MOON+ READER) ================= -->
+  <!-- Barra de Topo (Recolhível) -->
+  <header id="topBar" class="fixed top-0 left-0 right-0 z-40 bg-[var(--theme-surface)]/95 backdrop-blur border-b border-[var(--theme-border)] shadow-md transition-ui -translate-y-full px-4 py-2 flex items-center justify-between select-none">
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Botão Voltar para a Estante -->
+      <button id="btnBackToShelf" class="p-2 px-3 rounded-lg bg-[var(--theme-accent)]/15 hover:bg-[var(--theme-accent)]/25 text-[var(--theme-accent)] font-semibold text-xs flex items-center gap-1.5 active:scale-95 transition" title="Retornar para a Estante">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Estante</span>
+      </button>
+
+      <button id="btnChapters" class="p-2 rounded-lg hover:bg-black/10 active:scale-95 transition" title="Sumário e Capítulos">
+        <i class="fa-solid fa-list-ul text-lg"></i>
+      </button>
+      <div class="truncate max-w-[130px] sm:max-w-xs md:max-w-md">
+        <h1 id="bookTitle" class="text-sm font-bold truncate">Título do Livro</h1>
+        <p id="chapterTitle" class="text-xs opacity-75 truncate">Capítulo 1</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1 sm:gap-2">
+      <!-- Alternador de Layout: Página Única vs Livro Aberto (2 Páginas) -->
+      <button id="btnToggleSpread" class="hidden sm:flex px-2.5 py-1.5 rounded-lg hover:bg-black/10 text-xs font-semibold active:scale-95 transition items-center gap-1.5" title="Alternar entre 1 Página e Livro Aberto (2 Páginas)">
+        <i class="fa-solid fa-book-open text-sm text-[var(--theme-accent)]"></i>
+        <span id="spreadModeLabel">2 Págs</span>
+      </button>
+
+      <!-- Alternador de Modo PDF (Página Original vs Reflow de Texto) -->
+      <button id="btnTogglePdfMode" class="hidden px-2.5 py-1.5 rounded-lg bg-[var(--theme-accent)] text-white text-xs font-bold shadow-sm active:scale-95 transition items-center gap-1" title="Alternar entre Página Original PDF e Texto Reflow">
+        <i class="fa-solid fa-file-pdf"></i>
+        <span id="pdfModeLabel">Reflow</span>
+      </button>
+
+      <!-- Botão de Marcador de Página -->
+      <button id="btnToggleBookmark" class="p-2 rounded-lg hover:bg-black/10 active:scale-95 transition flex items-center gap-1" title="Marcar esta página">
+        <div id="topRibbon" class="ribbon-bookmark inactive"></div>
+      </button>
+      
+      <!-- Lista de Marcadores -->
+      <button id="btnBookmarksList" class="p-2 rounded-lg hover:bg-black/10 active:scale-95 transition" title="Ver Marcadores e Destaques">
+        <i class="fa-solid fa-bookmark text-base"></i>
+      </button>
+
+      <!-- Botão Configurações Tipográficas -->
+      <button id="btnSettings" class="p-2 rounded-lg hover:bg-black/10 active:scale-95 transition" title="Ajustes de Leitura">
+        <i class="fa-solid fa-font text-base"></i>
+      </button>
+
+      <!-- Alternar Tela Cheia -->
+      <button id="btnToggleFullscreen" class="p-2 rounded-lg hover:bg-black/10 active:scale-95 transition" title="Tela Cheia">
+        <i class="fa-solid fa-expand text-base"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= Área Principal de Leitura ================= -->
+  <main id="readerViewportContainer" class="relative flex-1 w-full h-full overflow-hidden flex items-center justify-center p-2 sm:p-4 md:p-6 book-viewport">
+    
+    <!-- Folha do Livro / Página com Efeito 3D -->
+    <div id="pageSheet" class="book-sheet relative w-full h-full max-w-6xl bg-[var(--theme-bg)] rounded-xl border border-[var(--theme-border)] flex flex-col overflow-hidden">
+      
+      <!-- Sombra projetada pela folha que está sendo virada -->
+      <div id="underPageShadow" class="under-page-shadow"></div>
+
+      <!-- Efeito visual de vinco central da lombada de livro -->
+      <div id="bookGutterOverlay" class="absolute inset-0 book-gutter-effect z-10 pointer-events-none"></div>
+
+      <!-- Fita física de marcador no topo direito da folha -->
+      <div id="sheetRibbon" class="absolute right-6 top-0 z-20 ribbon-bookmark inactive pointer-events-none"></div>
+
+      <!-- Viewport de Paginação Real (100% ajustado à altura da tela sem cortar texto) -->
+      <div id="paginatedViewport" class="flex-1 w-full h-full px-5 py-6 sm:px-10 sm:py-8">
+        <article id="readerContent" class="leading-relaxed select-text cursor-default">
+          <!-- Renderizado e paginado dinamicamente conforme o tamanho da tela -->
+        </article>
+      </div>
+
+      <!-- Visualizador Canvas para PDF Original (1 ou 2 páginas lado a lado) -->
+      <div id="pdfCanvasWrapper" class="hidden w-full h-full overflow-hidden flex items-center justify-center">
+        <canvas id="pdfRenderCanvas" class="pdf-canvas-themed block"></canvas>
+        <canvas id="pdfRenderCanvasRight" class="pdf-canvas-themed hidden border-l border-black/15"></canvas>
+      </div>
+
+      <!-- Zonas de Toque Invisíveis (Toque à Esquerda / Direita para folhear, Centro para Menu) -->
+      <div id="tapLeft" class="absolute left-0 top-0 bottom-0 w-1/5 z-20 cursor-w-resize" title="Página Anterior"></div>
+      <div id="tapCenter" class="absolute left-1/5 right-1/5 top-0 bottom-0 w-3/5 z-20 cursor-pointer" title="Menu de leitura"></div>
+      <div id="tapRight" class="absolute right-0 top-0 bottom-0 w-1/5 z-20 cursor-e-resize" title="Próxima Página"></div>
+    </div>
+
+    <!-- Botões Flutuantes Laterais em Telas Maiores -->
+    <button id="prevFloatingBtn" class="hidden md:flex absolute left-2 z-30 w-11 h-11 items-center justify-center rounded-full bg-[var(--theme-surface)]/80 hover:bg-[var(--theme-surface)] shadow-lg border border-[var(--theme-border)] text-lg active:scale-90 transition">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <button id="nextFloatingBtn" class="hidden md:flex absolute right-2 z-30 w-11 h-11 items-center justify-center rounded-full bg-[var(--theme-surface)]/80 hover:bg-[var(--theme-surface)] shadow-lg border border-[var(--theme-border)] text-lg active:scale-90 transition">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </main>
+
+  <!-- ================= Barra de Rodapé / Progresso ================= -->
+  <footer id="bottomBar" class="fixed bottom-0 left-0 right-0 z-40 bg-[var(--theme-surface)]/95 backdrop-blur border-t border-[var(--theme-border)] shadow-lg transition-ui translate-y-full px-4 py-3 select-none">
+    <div class="max-w-3xl mx-auto flex flex-col gap-2">
+      <!-- Indicadores de status -->
+      <div class="flex items-center justify-between text-xs font-medium opacity-80">
+        <span id="pageIndicator">Página 1 de 1</span>
+        <span id="readingProgressText">0% concluído</span>
+        <span id="estimatedTime">~3 min restantes</span>
+      </div>
+
+      <!-- Barra de progresso deslizante rápida -->
+      <div class="flex items-center gap-3">
+        <button id="stepPrevBtn" class="p-1 rounded hover:bg-black/10 active:scale-95 transition">
+          <i class="fa-solid fa-angle-left"></i>
+        </button>
+        <input type="range" id="pageSlider" min="1" max="1" value="1" class="w-full accent-[var(--theme-accent)] h-2 bg-black/10 rounded-lg cursor-pointer">
+        <button id="stepNextBtn" class="p-1 rounded hover:bg-black/10 active:scale-95 transition">
+          <i class="fa-solid fa-angle-right"></i>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= Barra Flutuante de Marcador de Texto (Highlight) ================= -->
+  <div id="highlightToolbar" class="fixed z-50 hidden bg-[var(--theme-surface)] border border-[var(--theme-border)] shadow-2xl rounded-full p-1.5 flex items-center gap-1.5 backdrop-blur">
+    <span class="text-xs px-2 font-bold opacity-75">Destacar:</span>
+    <button data-color="yellow" class="w-6 h-6 rounded-full bg-yellow-400 border border-yellow-500 shadow-sm hover:scale-110 active:scale-95 transition" title="Amarelo"></button>
+    <button data-color="green" class="w-6 h-6 rounded-full bg-green-400 border border-green-500 shadow-sm hover:scale-110 active:scale-95 transition" title="Verde"></button>
+    <button data-color="pink" class="w-6 h-6 rounded-full bg-pink-400 border border-pink-500 shadow-sm hover:scale-110 active:scale-95 transition" title="Rosa"></button>
+    <button data-color="blue" class="w-6 h-6 rounded-full bg-blue-400 border border-blue-500 shadow-sm hover:scale-110 active:scale-95 transition" title="Azul"></button>
+    <div class="h-4 w-[1px] bg-[var(--theme-border)] mx-0.5"></div>
+    <button id="btnCopySelection" class="p-1.5 text-xs rounded-full hover:bg-black/10 transition" title="Copiar citação">
+      <i class="fa-solid fa-copy"></i>
+    </button>
+  </div>
+
+  <!-- ================= Modal: Configurações de Leitura ================= -->
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all">
+    <div class="bg-[var(--theme-surface)] text-[var(--theme-text)] border border-[var(--theme-border)] w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl space-y-5 max-h-[85vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-[var(--theme-accent)]"></i> Personalizar Leitura
+        </h2>
+        <button id="closeSettingsBtn" class="p-2 rounded-full hover:bg-black/10">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Tamanho da Fonte -->
+      <div class="space-y-2">
+        <label class="text-xs font-semibold uppercase tracking-wider opacity-75">Tamanho da Fonte</label>
+        <div class="flex items-center gap-3">
+          <button id="fontDecBtn" class="w-9 h-9 rounded-lg bg-[var(--theme-bg)] border border-[var(--theme-border)] font-bold active:scale-95 transition">A-</button>
+          <input type="range" id="fontSizeSlider" min="14" max="32" value="19" class="flex-1 accent-[var(--theme-accent)]">
+          <button id="fontIncBtn" class="w-9 h-9 rounded-lg bg-[var(--theme-bg)] border border-[var(--theme-border)] font-bold active:scale-95 transition">A+</button>
+          <span id="fontSizeVal" class="text-xs font-mono font-bold w-10 text-right">19px</span>
+        </div>
+      </div>
+
+      <!-- Família da Fonte -->
+      <div class="space-y-2">
+        <label class="text-xs font-semibold uppercase tracking-wider opacity-75">Tipografia Amigável</label>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <button data-font="'Literata', serif" class="font-btn p-2.5 rounded-lg border border-[var(--theme-border)] text-left font-['Literata'] hover:border-[var(--theme-accent)] transition">
+            Literata (Livro)
+          </button>
+          <button data-font="'Merriweather', serif" class="font-btn p-2.5 rounded-lg border border-[var(--theme-border)] text-left font-['Merriweather'] hover:border-[var(--theme-accent)] transition">
+            Merriweather
+          </button>
+          <button data-font="'Atkinson Hyperlegible', sans-serif" class="font-btn p-2.5 rounded-lg border border-[var(--theme-border)] text-left font-['Atkinson_Hyperlegible'] hover:border-[var(--theme-accent)] transition">
+            Atkinson (Alta Legib.)
+          </button>
+          <button data-font="'Roboto', sans-serif" class="font-btn p-2.5 rounded-lg border border-[var(--theme-border)] text-left font-['Roboto'] hover:border-[var(--theme-accent)] transition">
+            Roboto (Moderna)
+          </button>
+        </div>
+      </div>
+
+      <!-- Temas de Cor Moon+ -->
+      <div class="space-y-2">
+        <label class="text-xs font-semibold uppercase tracking-wider opacity-75">Tema de Cor</label>
+        <div class="grid grid-cols-4 gap-2 text-center text-xs font-medium">
+          <button data-set-theme="sepia" class="p-3 rounded-xl border border-amber-300 bg-[#f4ecd8] text-[#3c2f23] shadow-sm flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="w-4 h-4 rounded-full bg-[#e8dcbf] border border-[#d4c4a2]"></span>
+            Sépia
+          </button>
+          <button data-set-theme="light" class="p-3 rounded-xl border border-gray-300 bg-[#fbfbfc] text-[#1f2937] shadow-sm flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="w-4 h-4 rounded-full bg-white border border-gray-300"></span>
+            Claro
+          </button>
+          <button data-set-theme="dark" class="p-3 rounded-xl border border-neutral-700 bg-[#121212] text-[#dedede] shadow-sm flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="w-4 h-4 rounded-full bg-neutral-800 border border-neutral-600"></span>
+            OLED
+          </button>
+          <button data-set-theme="warm" class="p-3 rounded-xl border border-amber-950 bg-[#221a15] text-[#ebd5b3] shadow-sm flex flex-col items-center gap-1 active:scale-95 transition">
+            <span class="w-4 h-4 rounded-full bg-[#2e221b] border border-[#423226]"></span>
+            Noturno
+          </button>
+        </div>
+      </div>
+
+      <!-- Altura de Linha & Alinhamento -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <label class="text-xs font-semibold uppercase tracking-wider opacity-75">Espaçamento</label>
+          <select id="lineHeightSelect" class="w-full bg-[var(--theme-bg)] border border-[var(--theme-border)] rounded-lg p-2 text-sm outline-none">
+            <option value="1.4">Compacto (1.4)</option>
+            <option value="1.7" selected>Normal (1.7)</option>
+            <option value="2.0">Amplo (2.0)</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-semibold uppercase tracking-wider opacity-75">Alinhamento</label>
+          <select id="textAlignSelect" class="w-full bg-[var(--theme-bg)] border border-[var(--theme-border)] rounded-lg p-2 text-sm outline-none">
+            <option value="justify" selected>Justificado</option>
+            <option value="left">À Esquerda</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= Modal: Marcadores e Destaques ================= -->
+  <div id="bookmarksModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[var(--theme-surface)] text-[var(--theme-text)] border border-[var(--theme-border)] w-full max-w-lg rounded-2xl p-6 shadow-2xl flex flex-col max-h-[80vh]">
+      
+      <div class="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
+        <div class="flex gap-4">
+          <button id="tabBookmarksBtn" class="text-sm font-bold border-b-2 border-[var(--theme-accent)] pb-1">
+            Páginas Marcadas (<span id="countBookmarks">0</span>)
+          </button>
+          <button id="tabHighlightsBtn" class="text-sm font-medium opacity-60 pb-1 hover:opacity-100 transition">
+            Destaques de Texto (<span id="countHighlights">0</span>)
+          </button>
+        </div>
+        <button id="closeBookmarksBtn" class="p-1 rounded-full hover:bg-black/10">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div id="bookmarksListContainer" class="flex-1 overflow-y-auto py-4 space-y-2">
+        <!-- Itens inseridos via script -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= Modal: Sumário / Capítulos ================= -->
+  <div id="chaptersModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[var(--theme-surface)] text-[var(--theme-text)] border border-[var(--theme-border)] w-full max-w-md rounded-2xl p-6 shadow-2xl flex flex-col max-h-[75vh]">
+      <div class="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
+        <h2 class="text-base font-bold flex items-center gap-2">
+          <i class="fa-solid fa-book-bookmark text-[var(--theme-accent)]"></i> Índice de Capítulos / Páginas
+        </h2>
+        <button id="closeChaptersBtn" class="p-1 rounded-full hover:bg-black/10">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div id="chaptersList" class="flex-1 overflow-y-auto py-3 space-y-1">
+        <!-- Preenchido via script -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ADICIONAR NOVO LIVRO À ESTANTE ================= -->
+  <div id="addBookModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 select-none">
+    <div class="bg-[#24130a] text-amber-100 border border-[#5d3215] w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[#4d2812] pb-3">
+        <h3 class="font-bold text-base flex items-center gap-2 text-amber-200">
+          <i class="fa-solid fa-book-medical text-amber-400"></i> Importar eBook ou Documento
+        </h3>
+        <button id="closeAddBookBtn" class="p-1.5 rounded-full hover:bg-black/20 text-amber-300">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Opção 1: Importar Arquivo (.epub / .pdf / .html / .txt) -->
+      <div class="p-5 rounded-xl bg-black/35 border border-[#5d3215] flex flex-col items-center justify-center text-center">
+        <div class="flex items-center gap-3 text-amber-400 text-2xl mb-2">
+          <i class="fa-solid fa-book"></i>
+          <i class="fa-solid fa-file-pdf"></i>
+          <i class="fa-solid fa-file-lines"></i>
+        </div>
+        <p class="text-xs font-semibold text-amber-200 mb-1">Importar do seu computador ou celular</p>
+        <p class="text-[11px] text-amber-400/75 mb-3">Suporte nativo para <strong>.EPUB</strong>, <strong>.PDF</strong>, <strong>.HTML</strong> e <strong>.TXT</strong></p>
+        <label class="cursor-pointer bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 px-5 py-2.5 rounded-full text-xs font-bold text-white shadow-md active:scale-95 transition">
+          <span>Selecionar Arquivo</span>
+          <input type="file" id="shelfFileInput" accept=".epub,.pdf,.txt,.html,.htm,application/epub+zip,application/pdf" class="hidden">
+        </label>
+      </div>
+
+      <div class="flex items-center my-2">
+        <div class="flex-1 h-[1px] bg-[#4d2812]"></div>
+        <span class="px-2 text-[10px] text-amber-400/50 uppercase tracking-widest font-semibold">Ou criar bloco de notas</span>
+        <div class="flex-1 h-[1px] bg-[#4d2812]"></div>
+      </div>
+
+      <!-- Opção 2: Adição Rápida Manual -->
+      <div class="space-y-3">
+        <div>
+          <label class="text-[11px] font-semibold text-amber-300">Título do Livro</label>
+          <input type="text" id="newBookTitle" placeholder="Ex: Lições de Eletromagnetismo" 
+                 class="w-full mt-1 px-3 py-2 text-xs rounded-lg bg-black/40 border border-[#5d3215] text-amber-100 outline-none focus:border-amber-400">
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold text-amber-300">Autor / Fonte</label>
+          <input type="text" id="newBookAuthor" placeholder="Ex: James Clerk Maxwell" 
+                 class="w-full mt-1 px-3 py-2 text-xs rounded-lg bg-black/40 border border-[#5d3215] text-amber-100 outline-none focus:border-amber-400">
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold text-amber-300">Cor da Capa</label>
+          <div class="flex items-center gap-2 mt-1">
+            <button type="button" data-cover-color="#1e3a8a" class="cover-color-btn w-7 h-7 rounded-full bg-blue-900 border-2 border-white/60 active:scale-95"></button>
+            <button type="button" data-cover-color="#14532d" class="cover-color-btn w-7 h-7 rounded-full bg-emerald-900 border-2 border-transparent active:scale-95"></button>
+            <button type="button" data-cover-color="#7c2d12" class="cover-color-btn w-7 h-7 rounded-full bg-orange-950 border-2 border-transparent active:scale-95"></button>
+            <button type="button" data-cover-color="#581c87" class="cover-color-btn w-7 h-7 rounded-full bg-purple-950 border-2 border-transparent active:scale-95"></button>
+            <button type="button" data-cover-color="#18181b" class="cover-color-btn w-7 h-7 rounded-full bg-zinc-900 border-2 border-transparent active:scale-95"></button>
+          </div>
+        </div>
+        <button id="btnCreateCustomBook" class="w-full mt-3 bg-amber-600 hover:bg-amber-500 active:scale-98 text-white font-bold py-2 rounded-xl text-xs shadow-lg transition">
+          Salvar na Estante
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay de Carregamento (Parsing EPUB / PDF) -->
+  <div id="loadingOverlay" class="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm hidden flex flex-col items-center justify-center text-amber-100 p-6 text-center">
+    <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+    <h3 id="loadingTitle" class="font-bold text-base text-amber-200">Processando arquivo...</h3>
+    <p id="loadingSubtitle" class="text-xs text-amber-400/80 mt-1 max-w-xs">Extraindo capítulos, metadados e imagens...</p>
+  </div>
+
+  <!-- Notificação Flutuante Toast -->
+  <div id="toast" class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 bg-black/85 text-white text-xs px-4 py-2 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300">
+    Mensagem Toast
+  </div>
+
+  <script>
+    /* =====================================================================
+       LUMINA READER & MOON+ WOODEN BOOKSHELF ENGINE (EPUB + PDF + INDEXEDDB)
+       ===================================================================== */
+
+    // Configuração do Worker do PDF.js
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    // Livros Padrão embutidos na Estante
+    const DEFAULT_LIBRARY = [
+      {
+        id: 'book-fisica-quantica',
+        title: 'Física Teórica & Mecânica Quântica',
+        author: 'Niels Bohr & Paul Dirac',
+        coverBg: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)',
+        coverImage: null,
+        textColor: '#e0f2fe',
+        badge: 'Fórmulas',
+        format: 'html',
+        lastReadPage: 0,
+        totalPages: 4,
+        dateAdded: 1714000000000,
+        chapters: [
+          {
+            chapterTitle: "Capítulo 1: Fundamentos Quânticos e Ondas",
+            content: `
+              <h2 class="text-xl sm:text-2xl font-bold mb-4">Capítulo 1: Fundamentos Quânticos</h2>
+              <p class="mb-4">
+                A física do século XX desvelou uma realidade onde partículas comportam-se simultaneamente como corpúsculos e como ondas oscilantes no tecido do espaço-tempo.
+              </p>
+              <p class="mb-3 font-semibold text-[var(--theme-accent)]">
+                A Equação de Schrödinger dependente do tempo:
+              </p>
+              $$ i\\hbar \\frac{\\partial}{\\partial t} \\Psi(\\mathbf{r}, t) = \\left[ -\\frac{\\hbar^2}{2m}\\nabla^2 + V(\\mathbf{r}, t) \\right] \\Psi(\\mathbf{r}, t) $$
+              <p class="mb-4">
+                Aqui, $\\Psi(\\mathbf{r}, t)$ representa a função de onda complexa, enquanto $\\hbar$ simboliza a constante reduzida de Planck. A densidade de probabilidade de encontrar o elétron na vizinhança do ponto espacial é dada por $|\\Psi|^2$.
+              </p>
+              <div class="my-5 p-4 rounded-xl bg-black/5 border-l-4 border-[var(--theme-accent)] italic">
+                "Aquele que não se choca com a mecânica quântica certamente ainda não a compreendeu em sua essência." — Niels Bohr
+              </div>
+              <p>
+                Ao contrário do determinismo laplaciano da mecânica newtoniana, a indeterminação torna-se axioma formal através da desigualdade de Heisenberg:
+              </p>
+              $$ \\sigma_x \\sigma_p \\ge \\frac{\\hbar}{2} $$
+            `
+          },
+          {
+            chapterTitle: "Capítulo 2: A Equação Espinorial de Dirac",
+            content: `
+              <h2 class="text-xl sm:text-2xl font-bold mb-4">Capítulo 2: Relatividade & Antimatéria</h2>
+              <p class="mb-4">
+                Ao unir a mecânica quântica linear à relatividade especial de Einstein, Paul Dirac derivou a celebrada matriz de quatro dimensões:
+              </p>
+              $$ (i\\gamma^\\mu \\partial_\\mu - m)\\psi = 0 $$
+              <p class="mb-4">
+                Onde as matrizes $\\gamma^\\mu$ obedecem à álgebra de Clifford:
+              </p>
+              $$ \\{\\gamma^\\mu, \\gamma^\\nu\\} = \\gamma^\\mu \\gamma^\\nu + \\gamma^\\nu \\gamma^\\mu = 2\\eta^{\\mu\\nu} I_4 $$
+              <p>
+                Essa estrutura revelou de forma inevitável o spin intrínseco do elétron e previu teoricamente a existência do pósitron antes de sua comprovação experimental.
+              </p>
+            `
+          },
+          {
+            chapterTitle: "Capítulo 3: Integrais de Trajetória de Feynman",
+            content: `
+              <h2 class="text-xl sm:text-2xl font-bold mb-4">Capítulo 3: Formulação de Feynman</h2>
+              <p class="mb-4">
+                Richard Feynman introduziu a noção de que uma partícula percorre todos os caminhos concebíveis simultaneamente entre dois eventos:
+              </p>
+              $$ \\langle x_f, t_f | x_i, t_i \\rangle = \\int \\mathcal{D}[x(t)] \\exp\\left( \\frac{i}{\\hbar} S[x(t)] \\right) $$
+              <p class="mb-4">
+                Onde $S = \\int L(x, \\dot{x}, t) dt$ denota a ação clássica no lagrangeano do sistema físico.
+              </p>
+            `
+          },
+          {
+            chapterTitle: "Capítulo 4: Conclusões e Teletransporte",
+            content: `
+              <h2 class="text-xl sm:text-2xl font-bold mb-4">Capítulo 4: Entrelaçamento Quântico</h2>
+              <p class="mb-4">
+                Estados de Bell evidenciam o entrelaçamento máximo entre dois qubits:
+              </p>
+              $$ |\\Phi^+\\rangle = \\frac{1}{\\sqrt{2}} (|00\\rangle + |11\\rangle) $$
+              <p>
+                Este fenômeno é hoje a pedra basilar da criptografia incondicionalmente segura e dos computadores quânticos de escala intermediária.
+              </p>
+            `
+          }
+        ]
+      },
+      {
+        id: 'book-calculo-diferencial',
+        title: 'Cálculo Avançado & Superfícies',
+        author: 'Bernhard Riemann & Gauss',
+        coverBg: 'linear-gradient(135deg, #064e3b 0%, #047857 100%)',
+        coverImage: null,
+        textColor: '#ecfdf5',
+        badge: 'Exatas',
+        format: 'html',
+        lastReadPage: 0,
+        totalPages: 3,
+        dateAdded: 1714001000000,
+        chapters: [
+          {
+            chapterTitle: "Capítulo 1: Teorema de Stokes e Formas Diferenciais",
+            content: `
+              <h2 class="text-xl sm:text-2xl font-bold mb-4">Formas Diferenciais e Stokes Geral</h2>
+              <p class="mb-4">
+                A síntese suprema de Green, Gauss e Stokes expressa-se na célebre e concisa identidade para qualquer variedade orientável com fronteira $\\partial M$:
+              </p>
+              $$ \\int_{\\partial M} \\omega = \\int_M d\\omega $$
+              <p class="mb-4">
+                Onde $\\omega$ é uma $(k-1)$-forma suave e $d\\omega$ sua derivada exterior canônica, satisfazendo identicamente $d(d\\omega) = 0$.
+              </p>
+            `
+          },
+          {
+            chapterTitle: "Capítulo 2: Integral Gaussiana & Coordenadas Polares",
+            content: `
+              <h2 class="text-xl sm:text-2xl font-bold mb-4">Integral de Gauss</h2>
+              $$ I = \\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi} $$
+              <p class="mb-4">
+                A transposição para coordenadas polares simplifica o produto no plano euclidiano:
+              </p>
+              $$ I^2 = \\int_0^{2\\pi} d\\theta \\int_0^\\infty r e^{-r^2} dr = 2\\pi \\left[-\\frac{1}{2} e^{-r^2}\\right]_0^\\infty = \\pi $$
+            `
+          },
+          {
+            chapterTitle: "Capítulo 3: Superfícies e Variedades Riemannianas",
+            content: `
+              <h2 class="text-xl sm:text-2xl font-bold mb-4">Tensores Métricos</h2>
+              <p class="mb-4">
+                A distância infinitesimal entre pontos em uma variedade é formalizada pelo tensor métrico simétrico $g_{ij}$:
+              </p>
+              $$ ds^2 = g_{ij} dx^i dx^j $$
+            `
+          }
+        ]
+      },
+      {
+        id: 'book-o-cortico',
+        title: 'O Cortiço',
+        author: 'Aluísio Azevedo',
+        coverBg: 'linear-gradient(135deg, #451a03 0%, #78350f 100%)',
+        coverImage: null,
+        textColor: '#fef3c7',
+        badge: 'Literatura',
+        format: 'html',
+        lastReadPage: 0,
+        totalPages: 2,
+        dateAdded: 1714003000000,
+        chapters: [
+          {
+            chapterTitle: "Capítulo 1: O Despertar da Estalagem",
+            content: `
+              <h2 class="text-xl sm:text-2xl font-bold mb-4">O Cortiço - Capítulo I</h2>
+              <p class="mb-4">
+                João Romão foi, dos treze aos vinte e cinco anos, empregado de um vendeiro no bairro de Botafogo. Vivia de salário mofino e dormia sobre o balcão. Mas possuía a cobiça tenaz dos que sabem juntar tostão por tostão.
+              </p>
+              <p class="mb-4">
+                Ao lado de sua venda comprou três braças de terra, e ali assentou os alicerces daquilo que se transformaria numa colmeia borbulhante de lavadeiras, carpinteiros e mascates.
+              </p>
+              <p class="italic">
+                "Era um ranger de trincos, um abrir de janelas, um bater de portas; ouvia-se o tinir das latas de água e o rumor alegre dos que acordavam para a faina diária."
+              </p>
+            `
+          },
+          {
+            chapterTitle: "Capítulo 2: O Fervilhar Humano",
+            content: `
+              <h2 class="text-xl sm:text-2xl font-bold mb-4">Capítulo II</h2>
+              <p class="mb-4">
+                E o cortiço crescia, estendendo seus tentáculos sobre o morro, fervilhando de vidas que o calor tropical moldava e transformava.
+              </p>
+            `
+          }
+        ]
+      }
+    ];
+
+    /* =====================================================================
+       INDEXEDDB HELPER (Para armazenar livros grandes EPUB/PDF sem estourar 5MB)
+       ===================================================================== */
+    const DB_NAME = 'LuminaReaderDB';
+    const DB_VERSION = 1;
+    const STORE_BOOKS = 'books';
+
+    function openBooksDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(STORE_BOOKS)) {
+            db.createObjectStore(STORE_BOOKS, { keyPath: 'id' });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function getAllBooksFromDB() {
+      try {
+        const db = await openBooksDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_BOOKS, 'readonly');
+          const store = tx.objectStore(STORE_BOOKS);
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => reject(req.error);
+        });
+      } catch (e) {
+        console.warn('IndexedDB fallback:', e);
+        return [];
+      }
+    }
+
+    async function saveBookToDB(book) {
+      try {
+        const db = await openBooksDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_BOOKS, 'readwrite');
+          const store = tx.objectStore(STORE_BOOKS);
+          const req = store.put(book);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
+        });
+      } catch (e) {
+        console.error('Erro ao salvar livro no IndexedDB:', e);
+      }
+    }
+
+    async function deleteBookFromDB(bookId) {
+      try {
+        const db = await openBooksDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_BOOKS, 'readwrite');
+          const store = tx.objectStore(STORE_BOOKS);
+          const req = store.delete(bookId);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
+        });
+      } catch (e) {
+        console.error('Erro ao remover livro do IndexedDB:', e);
+      }
+    }
+
+    // Estado Geral da Aplicação
+    const state = {
+      library: [],
+      currentBook: null,
+      currentPage: 0,
+      totalPages: 0,
+      fontSize: 19,
+      fontFamily: "'Literata', serif",
+      theme: 'sepia',
+      lineHeight: '1.7',
+      textAlign: 'justify',
+      uiVisible: false,
+      bookmarks: JSON.parse(localStorage.getItem('lumina_bookmarks') || '[]'),
+      highlights: JSON.parse(localStorage.getItem('lumina_highlights') || '[]'),
+      isAnimating: false,
+      selectedCoverColor: '#1e3a8a',
+      // Estado específico para PDF ativo em memória
+      activePdfDoc: null,
+      pdfRenderMode: 'canvas' // 'canvas' (página fiel) ou 'reflow' (texto extraído com fontes/temas)
+    };
+
+    // Elementos DOM
+    const bookshelfView = document.getElementById('bookshelfView');
+    const shelvesContainer = document.getElementById('shelvesContainer');
+    const shelfSearchInput = document.getElementById('shelfSearchInput');
+    const shelfSortSelect = document.getElementById('shelfSortSelect');
+    const shelfBooksCount = document.getElementById('shelfBooksCount');
+    const btnBackToShelf = document.getElementById('btnBackToShelf');
+    const addBookModal = document.getElementById('addBookModal');
+    const btnOpenAddBook = document.getElementById('btnOpenAddBook');
+    const closeAddBookBtn = document.getElementById('closeAddBookBtn');
+    const dropZoneOverlay = document.getElementById('dropZoneOverlay');
+
+    const readerContent = document.getElementById('readerContent');
+    const paginatedViewport = document.getElementById('paginatedViewport');
+    const bookGutterOverlay = document.getElementById('bookGutterOverlay');
+    const pdfCanvasWrapper = document.getElementById('pdfCanvasWrapper');
+    const pdfRenderCanvas = document.getElementById('pdfRenderCanvas');
+    const pdfRenderCanvasRight = document.getElementById('pdfRenderCanvasRight');
+    const underPageShadow = document.getElementById('underPageShadow');
+    const btnTogglePdfMode = document.getElementById('btnTogglePdfMode');
+    const pdfModeLabel = document.getElementById('pdfModeLabel');
+    const btnToggleSpread = document.getElementById('btnToggleSpread');
+    const spreadModeLabel = document.getElementById('spreadModeLabel');
+
+    // Estado de Paginação Real Responsiva (100% encaixado na tela)
+    state.spreadPreference = localStorage.getItem('lumina_spread') || 'auto'; // 'auto' | 'single' | 'double'
+    state.isTwoPageSpread = false;
+    state.flatPages = []; // Lista plana de todas as páginas reais calculadas para a tela atual
+
+    function computeIsTwoPageSpread() {
+      if (state.spreadPreference === 'single') return false;
+      if (state.spreadPreference === 'double') return window.innerWidth >= 700;
+      return window.innerWidth >= 900;
+    }
+
+    function updateSpreadButtonUI() {
+      const twoPages = computeIsTwoPageSpread();
+      if (spreadModeLabel) {
+        spreadModeLabel.textContent = twoPages ? '1 Pág' : '2 Págs';
+      }
+      if (bookGutterOverlay) {
+        if (twoPages) {
+          bookGutterOverlay.classList.remove('book-gutter-effect');
+          bookGutterOverlay.classList.add('book-center-crease');
+        } else {
+          bookGutterOverlay.classList.remove('book-center-crease');
+          bookGutterOverlay.classList.add('book-gutter-effect');
+        }
+      }
+    }
+
+    // Constrói e mede todas as páginas reais com base no tamanho exato da tela
+    async function rebuildResponsivePages(preserveProgressRatio = null) {
+      if (!state.currentBook) return;
+
+      const twoPages = computeIsTwoPageSpread();
+      state.isTwoPageSpread = twoPages;
+      updateSpreadButtonUI();
+
+      // Modo PDF Original (Canvas): cada página do PDF já é uma página real
+      if (state.currentBook.format === 'pdf' && state.activePdfDoc && state.pdfRenderMode === 'canvas') {
+        state.flatPages = state.currentBook.chapters.map((ch, idx) => ({
+          chapterIndex: idx,
+          chapterTitle: ch.chapterTitle,
+          subPageIndex: 0,
+          subPageTotal: 1,
+          isPdfCanvas: true,
+          pdfPageNum: idx + 1
+        }));
+        state.totalPages = state.flatPages.length;
+        if (preserveProgressRatio !== null) {
+          state.currentPage = Math.min(state.totalPages - 1, Math.max(0, Math.round(preserveProgressRatio * (state.totalPages - 1))));
+        }
+        if (twoPages && state.currentPage % 2 === 1) {
+          state.currentPage = Math.max(0, state.currentPage - 1);
+        }
+        return;
+      }
+
+      // Modo Texto / EPUB / HTML / PDF Reflow:
+      // Restaura dimensões fluidas do container
+      pageSheet.style.width = '';
+      pageSheet.style.height = '';
+      if (twoPages) {
+        pageSheet.classList.remove('max-w-3xl');
+        pageSheet.classList.add('max-w-6xl');
+      } else {
+        pageSheet.classList.remove('max-w-6xl');
+        pageSheet.classList.add('max-w-3xl');
+      }
+
+      pdfCanvasWrapper.classList.add('hidden');
+      paginatedViewport.classList.remove('hidden');
+
+      // Aplica tipografia antes de medir colunas
+      applyVisualStyles();
+
+      const vpStyle = window.getComputedStyle(paginatedViewport);
+      const padLeft = parseFloat(vpStyle.paddingLeft) || 0;
+      const padRight = parseFloat(vpStyle.paddingRight) || 0;
+      const padTop = parseFloat(vpStyle.paddingTop) || 0;
+      const padBottom = parseFloat(vpStyle.paddingBottom) || 0;
+
+      const innerWidth = Math.max(220, paginatedViewport.clientWidth - padLeft - padRight);
+      const innerHeight = Math.max(180, paginatedViewport.clientHeight - padTop - padBottom);
+
+      const columnGap = twoPages ? 56 : 32;
+      const singleColWidth = twoPages ? Math.floor((innerWidth - columnGap) / 2) : innerWidth;
+
+      readerContent.style.height = `${innerHeight}px`;
+      readerContent.style.columnWidth = `${singleColWidth}px`;
+      readerContent.style.columnGap = `${columnGap}px`;
+      readerContent.style.width = `${innerWidth}px`;
+      readerContent.style.transform = 'translateX(0px)';
+
+      const builtPages = [];
+
+      for (let cIdx = 0; cIdx < state.currentBook.chapters.length; cIdx++) {
+        const chap = state.currentBook.chapters[cIdx];
+        readerContent.innerHTML = chap.content;
+
+        // Renderiza fórmulas KaTeX antes de calcular a largura total das colunas
+        try {
+          if (window.renderMathInElement) {
+            renderMathInElement(readerContent, {
+              delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+              ],
+              throwOnError: false
+            });
+          }
+        } catch (err) { /* ignora erro KaTeX */ }
+
+        const totalScrollW = readerContent.scrollWidth;
+        const stepWidth = singleColWidth + columnGap;
+        const numCols = Math.max(1, Math.round((totalScrollW + columnGap) / stepWidth));
+
+        for (let col = 0; col < numCols; col++) {
+          builtPages.push({
+            chapterIndex: cIdx,
+            chapterTitle: chap.chapterTitle,
+            subPageIndex: col,
+            subPageTotal: numCols,
+            colWidth: singleColWidth,
+            colGap: columnGap,
+            innerHeight: innerHeight,
+            innerWidth: innerWidth
+          });
+        }
+      }
+
+      state.flatPages = builtPages.length > 0 ? builtPages : [{
+        chapterIndex: 0,
+        chapterTitle: state.currentBook.chapters[0]?.chapterTitle || 'Página 1',
+        subPageIndex: 0,
+        subPageTotal: 1,
+        colWidth: singleColWidth,
+        colGap: columnGap,
+        innerHeight: innerHeight,
+        innerWidth: innerWidth
+      }];
+
+      state.totalPages = state.flatPages.length;
+
+      if (preserveProgressRatio !== null) {
+        state.currentPage = Math.min(state.totalPages - 1, Math.max(0, Math.round(preserveProgressRatio * (state.totalPages - 1))));
+      } else {
+        state.currentPage = Math.min(state.totalPages - 1, Math.max(0, state.currentPage));
+      }
+
+      // Em modo livro aberto (2 páginas), alinha sempre na página par (esquerda)
+      if (twoPages && state.currentPage % 2 === 1) {
+        state.currentPage = Math.max(0, state.currentPage - 1);
+      }
+    }
+
+    const pageSheet = document.getElementById('pageSheet');
+    const topBar = document.getElementById('topBar');
+    const bottomBar = document.getElementById('bottomBar');
+    const topRibbon = document.getElementById('topRibbon');
+    const sheetRibbon = document.getElementById('sheetRibbon');
+    const pageIndicator = document.getElementById('pageIndicator');
+    const readingProgressText = document.getElementById('readingProgressText');
+    const estimatedTime = document.getElementById('estimatedTime');
+    const pageSlider = document.getElementById('pageSlider');
+    const bookTitleEl = document.getElementById('bookTitle');
+    const chapterTitleEl = document.getElementById('chapterTitle');
+    const highlightToolbar = document.getElementById('highlightToolbar');
+    const toastEl = document.getElementById('toast');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingTitle = document.getElementById('loadingTitle');
+    const loadingSubtitle = document.getElementById('loadingSubtitle');
+
+    // Inicialização da Aplicação
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadSavedLibrary();
+      loadSavedPreferences();
+      setupEventListeners();
+      setupDragAndDrop();
+      renderBookshelf();
+      updateBookmarksUI();
+    });
+
+    async function loadSavedLibrary() {
+      const dbBooks = await getAllBooksFromDB();
+      if (dbBooks && dbBooks.length > 0) {
+        state.library = dbBooks;
+      } else {
+        // Migra do localStorage antigo se existir, ou carrega os livros padrão
+        const legacy = localStorage.getItem('lumina_library');
+        if (legacy) {
+          try {
+            state.library = JSON.parse(legacy);
+          } catch (e) {
+            state.library = [...DEFAULT_LIBRARY];
+          }
+        } else {
+          state.library = [...DEFAULT_LIBRARY];
+        }
+        for (const b of state.library) {
+          await saveBookToDB(b);
+        }
+      }
+    }
+
+    function loadSavedPreferences() {
+      const savedTheme = localStorage.getItem('lumina_theme');
+      if (savedTheme) {
+        state.theme = savedTheme;
+        document.body.setAttribute('data-theme', savedTheme);
+      }
+
+      const savedSize = localStorage.getItem('lumina_fontsize');
+      if (savedSize) {
+        state.fontSize = parseInt(savedSize, 10);
+        document.getElementById('fontSizeSlider').value = state.fontSize;
+        document.getElementById('fontSizeVal').textContent = `${state.fontSize}px`;
+      }
+
+      const savedFont = localStorage.getItem('lumina_fontfamily');
+      if (savedFont) {
+        state.fontFamily = savedFont;
+      }
+    }
+
+    function showLoading(title, subtitle = '') {
+      loadingTitle.textContent = title;
+      loadingSubtitle.textContent = subtitle;
+      loadingOverlay.classList.remove('hidden');
+    }
+
+    function hideLoading() {
+      loadingOverlay.classList.add('hidden');
+    }
+
+    /* =====================================================================
+       RENDERIZAÇÃO DA ESTANTE DE MADEIRA REALISTA
+       ===================================================================== */
+    function renderBookshelf() {
+      shelvesContainer.innerHTML = '';
+      const filterText = shelfSearchInput.value.toLowerCase().trim();
+      const sortMode = shelfSortSelect.value;
+
+      let books = [...state.library];
+
+      if (filterText) {
+        books = books.filter(b => 
+          b.title.toLowerCase().includes(filterText) || 
+          b.author.toLowerCase().includes(filterText)
+        );
+      }
+
+      if (sortMode === 'recent') {
+        books.sort((a, b) => (b.dateAdded || 0) - (a.dateAdded || 0));
+      } else if (sortMode === 'progress') {
+        books.sort((a, b) => {
+          const progA = ((a.lastReadPage || 0) + 1) / (a.totalPages || 1);
+          const progB = ((b.lastReadPage || 0) + 1) / (b.totalPages || 1);
+          return progB - progA;
+        });
+      } else if (sortMode === 'title') {
+        books.sort((a, b) => a.title.localeCompare(b.title));
+      }
+
+      shelfBooksCount.textContent = `${books.length} ${books.length === 1 ? 'livro guardado' : 'livros guardados'}`;
+
+      if (books.length === 0) {
+        shelvesContainer.innerHTML = `
+          <div class="text-center py-16 text-[#4a2b0f]">
+            <i class="fa-solid fa-book-open text-4xl mb-3 opacity-50"></i>
+            <p class="text-sm font-bold">Nenhum livro encontrado nesta prateleira.</p>
+            <button onclick="document.getElementById('shelfSearchInput').value=''; renderBookshelf();" 
+                    class="mt-3 text-xs underline font-semibold text-[#5c3612] hover:text-black">
+              Limpar busca
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      // Distribui os livros nas prateleiras (até 5 livros por prateleira em telas largas, igual à estética iBooks)
+      const booksPerShelf = window.innerWidth >= 1024 ? 5 : (window.innerWidth >= 640 ? 4 : 3);
+      for (let i = 0; i < books.length; i += booksPerShelf) {
+        const shelfSlice = books.slice(i, i + booksPerShelf);
+        const shelfRow = document.createElement('div');
+        shelfRow.className = 'relative flex flex-col pt-2';
+
+        // Linha com os livros apoiados diretamente sobre a borda da prateleira (items-end)
+        const booksRow = document.createElement('div');
+        booksRow.className = 'grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-7 px-1 sm:px-3 items-end z-10';
+
+        shelfSlice.forEach(book => {
+          const bookCard = createBookCardElement(book);
+          booksRow.appendChild(bookCard);
+        });
+
+        // Prancha de madeira chanfrada realista
+        const plank = document.createElement('div');
+        plank.className = 'wooden-plank';
+
+        shelfRow.appendChild(booksRow);
+        shelfRow.appendChild(plank);
+        shelvesContainer.appendChild(shelfRow);
+      }
+    }
+
+    function createBookCardElement(book) {
+      const card = document.createElement('div');
+      card.className = 'group relative flex flex-col items-center justify-end cursor-pointer select-none w-full';
+
+      const progressPct = Math.round((((book.lastReadPage || 0) + 1) / (book.totalPages || 1)) * 100);
+      const hasCoverImg = Boolean(book.coverImage);
+
+      if (hasCoverImg) {
+        // Quando o EPUB ou PDF possui imagem de capa real:
+        // Exibe a capa limpa na proporção natural da arte (respeitando livros mais altos ou mais quadrados)
+        card.innerHTML = `
+          <div class="book-card relative w-full max-w-[148px] rounded-[2px] overflow-hidden bg-white border border-black/25">
+            <img src="${book.coverImage}" alt="${escapeHtml(book.title)}" class="w-full h-auto max-h-[210px] object-cover block">
+            
+            <!-- Vinco sutil da lombada à esquerda -->
+            <div class="absolute inset-y-0 left-0 w-4 book-spine-effect pointer-events-none"></div>
+            <div class="absolute inset-0 ring-1 ring-inset ring-black/15 pointer-events-none"></div>
+
+            <!-- Botão discreto de excluir apenas ao passar o mouse -->
+            <button data-delete-book="${book.id}" class="opacity-0 group-hover:opacity-100 absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/70 text-white hover:bg-red-600 flex items-center justify-center transition shadow" title="Remover da estante">
+              <i class="fa-solid fa-trash-can text-[10px]"></i>
+            </button>
+
+            <!-- Barra fina de progresso na base da capa (aparece somente se já iniciou a leitura) -->
+            ${(book.lastReadPage || 0) > 0 ? `
+              <div class="absolute bottom-0 left-0 right-0 h-1 bg-black/40">
+                <div class="h-full bg-amber-400" style="width: ${progressPct}%"></div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      } else {
+        // Para livros sem imagem de capa embutida (criados manualmente ou TXT/HTML):
+        // Capa clássica proporcional apoiada na prateleira
+        card.innerHTML = `
+          <div class="book-card relative w-full max-w-[144px] aspect-[2/3] rounded-[2px] overflow-hidden flex flex-col justify-between p-3 border border-black/30 text-left"
+               style="background: ${book.coverBg || '#1e3a8a'}; color: ${book.textColor || '#fff'}">
+            
+            <!-- Vinco da lombada à esquerda -->
+            <div class="absolute inset-y-0 left-0 w-4 book-spine-effect pointer-events-none"></div>
+            <div class="absolute inset-0 ring-1 ring-inset ring-white/15 pointer-events-none"></div>
+
+            <!-- Topo: Selo discreto e botão excluir -->
+            <div class="relative z-10 flex justify-between items-start pl-1">
+              <span class="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-black/30 text-white/90">
+                ${book.badge || 'LIVRO'}
+              </span>
+              <button data-delete-book="${book.id}" class="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-full bg-black/55 text-white hover:bg-red-600 flex items-center justify-center transition" title="Remover da estante">
+                <i class="fa-solid fa-trash-can text-[9px]"></i>
+              </button>
+            </div>
+
+            <!-- Centro: Tipografia Clássica de Capa -->
+            <div class="relative z-10 pl-1.5 my-auto">
+              <h3 class="font-extrabold text-xs sm:text-sm leading-snug line-clamp-4 drop-shadow font-['Literata']">
+                ${escapeHtml(book.title)}
+              </h3>
+              <div class="w-6 h-[1px] bg-current opacity-40 my-1.5"></div>
+              <p class="text-[10px] opacity-85 line-clamp-2 font-sans">
+                ${escapeHtml(book.author)}
+              </p>
+            </div>
+
+            <!-- Base: Progresso discreto -->
+            <div class="relative z-10 pl-1">
+              ${(book.lastReadPage || 0) > 0 ? `
+                <div class="w-full h-1 bg-black/35 rounded-full overflow-hidden">
+                  <div class="h-full bg-amber-300" style="width: ${progressPct}%"></div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('[data-delete-book]')) {
+          e.stopPropagation();
+          deleteBookFromShelf(book.id);
+          return;
+        }
+        openBookInReader(book.id);
+      });
+
+      return card;
+    }
+
+    async function openBookInReader(bookId) {
+      const book = state.library.find(b => b.id === bookId);
+      if (!book) return;
+
+      state.currentBook = book;
+      state.currentPage = book.lastReadPage || 0;
+      state.activePdfDoc = null;
+      state.loadedChapterIndex = -1;
+
+      bookTitleEl.textContent = book.title;
+
+      // Se for um arquivo PDF com dados binários salvos, inicializa o documento PDF.js
+      if (book.format === 'pdf' && book.pdfData) {
+        showLoading('Abrindo PDF...', 'Preparando páginas em alta resolução');
+        try {
+          const loadingTask = pdfjsLib.getDocument({ data: book.pdfData.slice(0) });
+          state.activePdfDoc = await loadingTask.promise;
+          state.pdfRenderMode = 'canvas';
+          btnTogglePdfMode.classList.remove('hidden');
+          btnTogglePdfMode.classList.add('flex');
+          pdfModeLabel.textContent = 'Modo Texto';
+        } catch (err) {
+          console.error('Erro ao inicializar PDF:', err);
+          state.pdfRenderMode = 'reflow';
+          btnTogglePdfMode.classList.add('hidden');
+          btnTogglePdfMode.classList.remove('flex');
+        }
+        hideLoading();
+      } else {
+        btnTogglePdfMode.classList.add('hidden');
+        btnTogglePdfMode.classList.remove('flex');
+      }
+
+      // Animação de transição suave da estante para o leitor
+      bookshelfView.style.opacity = '0';
+      bookshelfView.style.pointerEvents = 'none';
+
+      setTimeout(async () => {
+        bookshelfView.classList.add('hidden');
+        await rebuildResponsivePages(null);
+        await renderCurrentPage();
+        updateBookmarksUI();
+        showToast(`Abrindo "${book.title}"`);
+      }, 300);
+    }
+
+    async function returnToBookshelf() {
+      // Salva a página atual do livro antes de sair
+      if (state.currentBook) {
+        state.currentBook.lastReadPage = state.currentPage;
+        await saveBookToDB(state.currentBook);
+      }
+
+      state.activePdfDoc = null;
+      state.loadedChapterIndex = -1;
+      setUIVisibility(false);
+      bookshelfView.classList.remove('hidden');
+      setTimeout(() => {
+        bookshelfView.style.opacity = '1';
+        bookshelfView.style.pointerEvents = 'auto';
+        renderBookshelf();
+      }, 20);
+    }
+
+    async function deleteBookFromShelf(bookId) {
+      const idx = state.library.findIndex(b => b.id === bookId);
+      if (idx >= 0) {
+        const title = state.library[idx].title;
+        state.library.splice(idx, 1);
+        await deleteBookFromDB(bookId);
+        renderBookshelf();
+        showToast(`Livro "${title}" removido da estante.`);
+      }
+    }
+
+    /* ================= Virada de Página Realista Estilo Papel ================= */
+    function createPaperCloneLeaf(halfSide = 'full') {
+      const leaf = document.createElement('div');
+      leaf.className = 'paper-flip-leaf flex flex-col';
+
+      // Copia o vinco da lombada apenas no modo página única
+      if (halfSide === 'full') {
+        const gutter = document.createElement('div');
+        gutter.className = 'absolute inset-0 book-gutter-effect z-10 pointer-events-none';
+        leaf.appendChild(gutter);
+      }
+
+      if (state.currentBook?.format === 'pdf' && state.activePdfDoc && state.pdfRenderMode === 'canvas') {
+        const wrapperClone = document.createElement('div');
+        wrapperClone.className = 'w-full h-full flex items-center justify-center';
+
+        if (halfSide === 'right' && !pdfRenderCanvasRight.classList.contains('hidden')) {
+          const imgRightClone = document.createElement('img');
+          imgRightClone.src = pdfRenderCanvasRight.toDataURL('image/jpeg', 0.88);
+          imgRightClone.className = 'w-full h-full object-contain pdf-canvas-themed block';
+          wrapperClone.appendChild(imgRightClone);
+        } else if (halfSide === 'left') {
+          const imgLeftClone = document.createElement('img');
+          imgLeftClone.src = pdfRenderCanvas.toDataURL('image/jpeg', 0.88);
+          imgLeftClone.className = 'w-full h-full object-contain pdf-canvas-themed block';
+          wrapperClone.appendChild(imgLeftClone);
+        } else {
+          const imgClone = document.createElement('img');
+          imgClone.src = pdfRenderCanvas.toDataURL('image/jpeg', 0.88);
+          imgClone.className = 'h-full object-contain pdf-canvas-themed block';
+          wrapperClone.appendChild(imgClone);
+        }
+        leaf.appendChild(wrapperClone);
+      } else {
+        // Clona o viewport paginado exatamente na coluna atual
+        const vpClone = paginatedViewport.cloneNode(true);
+        vpClone.removeAttribute('id');
+        const clonedArticle = vpClone.querySelector('article');
+        if (clonedArticle) clonedArticle.removeAttribute('id');
+
+        // Em modo livro aberto (2 páginas), recorta exatamente a metade direita ou esquerda
+        if (halfSide === 'right' || halfSide === 'left') {
+          const fullSheetW = pageSheet.clientWidth;
+          vpClone.style.width = `${fullSheetW}px`;
+          vpClone.style.position = 'absolute';
+          vpClone.style.top = '0';
+          vpClone.style.bottom = '0';
+          vpClone.style.left = halfSide === 'right' ? `-${Math.floor(fullSheetW / 2)}px` : '0px';
+        }
+
+        leaf.appendChild(vpClone);
+      }
+
+      return leaf;
+    }
+
+    async function turnPage(direction) {
+      if (state.isAnimating || !state.currentBook || state.flatPages.length === 0) return;
+
+      // Garante sincronia imediata com a largura atual da janela antes de calcular o salto
+      const liveTwoPages = computeIsTwoPageSpread();
+      if (liveTwoPages !== state.isTwoPageSpread) {
+        const ratio = state.totalPages > 1 ? state.currentPage / (state.totalPages - 1) : 0;
+        await rebuildResponsivePages(ratio);
+        await renderCurrentPage(false);
+      }
+
+      const step = state.isTwoPageSpread ? 2 : 1;
+      let targetPage = state.currentPage + (direction * step);
+
+      if (direction < 0 && state.currentPage > 0 && targetPage < 0) {
+        targetPage = 0;
+      }
+
+      if (targetPage < 0) {
+        showToast("Você já está no início do livro.");
+        return;
+      }
+      if (targetPage >= state.flatPages.length) {
+        showToast("Você chegou ao fim do livro!");
+        return;
+      }
+
+      state.isAnimating = true;
+
+      // Remove qualquer folha residual anterior
+      pageSheet.querySelectorAll('.paper-flip-leaf').forEach(el => el.remove());
+      underPageShadow.classList.remove('active-forward', 'active-backward', 'spread-shadow-right', 'spread-shadow-left');
+      void underPageShadow.offsetWidth;
+
+      if (state.isTwoPageSpread) {
+        // ===== FÍSICA DE LIVRO ABERTO (2 PÁGINAS COM LOMBADA CENTRAL) =====
+        if (direction > 0) {
+          // Avançando: a página DIREITA atual dobra da direita para a esquerda sobre o centro
+          const rightLeaf = createPaperCloneLeaf('right');
+          pageSheet.appendChild(rightLeaf);
+
+          state.currentPage = targetPage;
+          state.currentBook.lastReadPage = state.currentPage;
+          saveBookToDB(state.currentBook);
+          await renderCurrentPage(true);
+
+          underPageShadow.classList.add('spread-shadow-right');
+          rightLeaf.classList.add('spread-flip-forward');
+
+          setTimeout(() => {
+            rightLeaf.remove();
+            underPageShadow.classList.remove('spread-shadow-right');
+            state.isAnimating = false;
+          }, 520);
+        } else {
+          // Voltando: a página ESQUERDA atual dobra da esquerda para a direita sobre o centro
+          const leftLeaf = createPaperCloneLeaf('left');
+          pageSheet.appendChild(leftLeaf);
+
+          state.currentPage = targetPage;
+          state.currentBook.lastReadPage = state.currentPage;
+          saveBookToDB(state.currentBook);
+          await renderCurrentPage(true);
+
+          underPageShadow.classList.add('spread-shadow-left');
+          leftLeaf.classList.add('spread-flip-backward');
+
+          setTimeout(() => {
+            leftLeaf.remove();
+            underPageShadow.classList.remove('spread-shadow-left');
+            state.isAnimating = false;
+          }, 520);
+        }
+      } else {
+        // ===== FÍSICA DE PÁGINA ÚNICA (TELAS MENORES / CELULAR) =====
+        if (direction > 0) {
+          const currentLeaf = createPaperCloneLeaf('full');
+          pageSheet.appendChild(currentLeaf);
+
+          state.currentPage = targetPage;
+          state.currentBook.lastReadPage = state.currentPage;
+          saveBookToDB(state.currentBook);
+          await renderCurrentPage(true);
+
+          underPageShadow.classList.add('active-forward');
+          currentLeaf.classList.add('flip-forward');
+
+          setTimeout(() => {
+            currentLeaf.remove();
+            underPageShadow.classList.remove('active-forward');
+            state.isAnimating = false;
+          }, 520);
+        } else {
+          state.currentPage = targetPage;
+          state.currentBook.lastReadPage = state.currentPage;
+          saveBookToDB(state.currentBook);
+
+          await renderCurrentPage(true);
+          const prevLeaf = createPaperCloneLeaf('full');
+
+          underPageShadow.classList.add('active-backward');
+          prevLeaf.classList.add('flip-backward');
+          pageSheet.appendChild(prevLeaf);
+
+          setTimeout(() => {
+            prevLeaf.remove();
+            underPageShadow.classList.remove('active-backward');
+            state.isAnimating = false;
+          }, 520);
+        }
+      }
+    }
+
+    /* ================= Renderização de Conteúdo (EPUB / HTML / PDF) ================= */
+    async function renderCurrentPage(smoothScroll = true) {
+      if (!state.currentBook) return;
+      if (state.flatPages.length === 0) {
+        await rebuildResponsivePages(null);
+      }
+
+      state.totalPages = state.flatPages.length;
+      state.currentPage = Math.min(state.totalPages - 1, Math.max(0, state.currentPage));
+      const pageMeta = state.flatPages[state.currentPage];
+
+      chapterTitleEl.textContent = pageMeta.subPageTotal > 1
+        ? `${pageMeta.chapterTitle} (${pageMeta.subPageIndex + 1}/${pageMeta.subPageTotal})`
+        : pageMeta.chapterTitle;
+
+      // Verifica se estamos lendo um PDF no modo visual original (Canvas)
+      if (state.currentBook.format === 'pdf' && state.activePdfDoc && state.pdfRenderMode === 'canvas') {
+        paginatedViewport.classList.add('hidden');
+        pdfCanvasWrapper.classList.remove('hidden');
+        await renderPdfPageOnCanvas(pageMeta.pdfPageNum);
+      } else {
+        // Modo Paginação Real por Colunas (100% ajustado à tela, sem corte vertical)
+        pageSheet.style.width = '';
+        pageSheet.style.height = '';
+        pdfCanvasWrapper.classList.add('hidden');
+        paginatedViewport.classList.remove('hidden');
+
+        // Só re-injeta o HTML do capítulo se mudou de capítulo
+        if (state.loadedChapterIndex !== pageMeta.chapterIndex) {
+          const chap = state.currentBook.chapters[pageMeta.chapterIndex];
+          readerContent.innerHTML = chap.content;
+          state.loadedChapterIndex = pageMeta.chapterIndex;
+
+          applyStoredHighlights(state.currentBook.id, pageMeta.chapterIndex);
+
+          try {
+            if (window.renderMathInElement) {
+              renderMathInElement(readerContent, {
+                delimiters: [
+                  { left: '$$', right: '$$', display: true },
+                  { left: '$', right: '$', display: false },
+                  { left: '\\(', right: '\\)', display: false },
+                  { left: '\\[', right: '\\]', display: true }
+                ],
+                throwOnError: false
+              });
+            }
+          } catch (err) {
+            console.warn("KaTeX render notice:", err);
+          }
+        }
+
+        applyVisualStyles();
+        readerContent.style.height = `${pageMeta.innerHeight}px`;
+        readerContent.style.columnWidth = `${pageMeta.colWidth}px`;
+        readerContent.style.columnGap = `${pageMeta.colGap}px`;
+        readerContent.style.width = `${pageMeta.innerWidth}px`;
+
+        // Desloca horizontalmente exatamente para a coluna da página atual
+        const offsetX = pageMeta.subPageIndex * (pageMeta.colWidth + pageMeta.colGap);
+        readerContent.style.transform = `translateX(-${offsetX}px)`;
+      }
+
+      // Atualiza indicador do slider e rodapé
+      pageSlider.max = state.totalPages;
+      pageSlider.value = state.currentPage + 1;
+
+      if (state.isTwoPageSpread && state.currentPage + 1 < state.totalPages) {
+        pageIndicator.textContent = `Páginas ${state.currentPage + 1}–${state.currentPage + 2} de ${state.totalPages}`;
+      } else {
+        pageIndicator.textContent = `Página ${state.currentPage + 1} de ${state.totalPages}`;
+      }
+
+      const lastVisiblePage = state.isTwoPageSpread
+        ? Math.min(state.totalPages, state.currentPage + 2)
+        : state.currentPage + 1;
+
+      const progressPct = Math.round((lastVisiblePage / state.totalPages) * 100);
+      readingProgressText.textContent = `${progressPct}% concluído`;
+
+      const pagesLeft = state.totalPages - lastVisiblePage;
+      estimatedTime.textContent = pagesLeft > 0 ? `~${Math.ceil(pagesLeft * 1.5)} min restantes` : 'Última página';
+
+      updateBookmarkRibbonState();
+    }
+
+    async function renderSinglePdfCanvas(pageNum, canvasEl, maxAvailWidth, maxAvailHeight) {
+      const page = await state.activePdfDoc.getPage(pageNum);
+      const unscaledViewport = page.getViewport({ scale: 1.0 });
+
+      const fitScale = Math.min(
+        maxAvailWidth / unscaledViewport.width,
+        maxAvailHeight / unscaledViewport.height
+      );
+
+      const displayWidth = Math.floor(unscaledViewport.width * fitScale);
+      const displayHeight = Math.floor(unscaledViewport.height * fitScale);
+
+      const dpr = Math.max(1.5, window.devicePixelRatio || 1);
+      const renderViewport = page.getViewport({ scale: fitScale * dpr });
+
+      const context = canvasEl.getContext('2d');
+      canvasEl.width = renderViewport.width;
+      canvasEl.height = renderViewport.height;
+      canvasEl.style.width = `${displayWidth}px`;
+      canvasEl.style.height = `${displayHeight}px`;
+
+      await page.render({
+        canvasContext: context,
+        viewport: renderViewport
+      }).promise;
+
+      return { displayWidth, displayHeight };
+    }
+
+    async function renderPdfPageOnCanvas(pageNum) {
+      if (!state.activePdfDoc) return;
+      try {
+        const viewportContainer = document.getElementById('readerViewportContainer');
+        const containerStyle = window.getComputedStyle(viewportContainer);
+        const padX = parseFloat(containerStyle.paddingLeft) + parseFloat(containerStyle.paddingRight);
+        const padY = parseFloat(containerStyle.paddingTop) + parseFloat(containerStyle.paddingBottom);
+
+        const availWidth = Math.max(200, viewportContainer.clientWidth - padX);
+        const availHeight = Math.max(200, viewportContainer.clientHeight - padY);
+
+        const hasRightPage = state.isTwoPageSpread && (pageNum + 1 <= state.activePdfDoc.numPages);
+
+        if (hasRightPage) {
+          const halfWidth = Math.floor(availWidth / 2);
+          const leftDims = await renderSinglePdfCanvas(pageNum, pdfRenderCanvas, halfWidth, availHeight);
+          pdfRenderCanvasRight.classList.remove('hidden');
+          const rightDims = await renderSinglePdfCanvas(pageNum + 1, pdfRenderCanvasRight, halfWidth, availHeight);
+
+          pageSheet.style.width = `${leftDims.displayWidth + rightDims.displayWidth}px`;
+          pageSheet.style.height = `${Math.max(leftDims.displayHeight, rightDims.displayHeight)}px`;
+        } else {
+          pdfRenderCanvasRight.classList.add('hidden');
+          const dims = await renderSinglePdfCanvas(pageNum, pdfRenderCanvas, availWidth, availHeight);
+          pageSheet.style.width = `${dims.displayWidth}px`;
+          pageSheet.style.height = `${dims.displayHeight}px`;
+        }
+      } catch (err) {
+        console.error('Erro ao renderizar página PDF:', err);
+      }
+    }
+
+    function applyVisualStyles() {
+      readerContent.style.fontSize = `${state.fontSize}px`;
+      readerContent.style.fontFamily = state.fontFamily;
+      readerContent.style.lineHeight = state.lineHeight;
+      readerContent.style.textAlign = state.textAlign;
+    }
+
+    /* =====================================================================
+       MOTOR DE LEITURA DE ARQUIVOS EPUB (.epub via JSZip)
+       ===================================================================== */
+    async function parseEpubFile(file) {
+      if (!window.JSZip) {
+        throw new Error("Biblioteca JSZip não carregada.");
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      const zip = await JSZip.loadAsync(arrayBuffer);
+
+      // 1. Ler META-INF/container.xml para achar o arquivo .opf principal
+      const containerFile = zip.file("META-INF/container.xml");
+      if (!containerFile) {
+        throw new Error("Arquivo EPUB inválido (container.xml ausente).");
+      }
+      const containerXml = await containerFile.async("string");
+      const parser = new DOMParser();
+      const containerDoc = parser.parseFromString(containerXml, "application/xml");
+      const rootfileEl = containerDoc.querySelector("rootfile");
+      const opfPath = rootfileEl ? rootfileEl.getAttribute("full-path") : null;
+
+      if (!opfPath) {
+        throw new Error("Caminho OPF não encontrado no EPUB.");
+      }
+
+      const opfDir = opfPath.includes("/") ? opfPath.substring(0, opfPath.lastIndexOf("/") + 1) : "";
+      const opfXml = await zip.file(opfPath).async("string");
+      const opfDoc = parser.parseFromString(opfXml, "application/xml");
+
+      // 2. Extrair Metadados (Título e Autor)
+      const titleEl = opfDoc.getElementsByTagNameNS("*", "title")[0] || opfDoc.querySelector("title");
+      const creatorEl = opfDoc.getElementsByTagNameNS("*", "creator")[0] || opfDoc.querySelector("creator");
+      const bookTitle = titleEl ? titleEl.textContent.trim() : file.name.replace(/\.epub$/i, "");
+      const bookAuthor = creatorEl ? creatorEl.textContent.trim() : "Autor Desconhecido";
+
+      // 3. Mapear Manifesto (Manifest) e localizar a Capa (Cover)
+      const manifestItems = {};
+      let coverItemId = null;
+
+      const metaCover = opfDoc.querySelector('meta[name="cover"]');
+      if (metaCover) {
+        coverItemId = metaCover.getAttribute("content");
+      }
+
+      opfDoc.querySelectorAll("manifest > item").forEach(item => {
+        const id = item.getAttribute("id");
+        const href = item.getAttribute("href");
+        const mediaType = item.getAttribute("media-type");
+        const properties = item.getAttribute("properties") || "";
+        manifestItems[id] = { href, mediaType, properties };
+        if (!coverItemId && properties.includes("cover-image")) {
+          coverItemId = id;
+        }
+      });
+
+      // Helper para resolver caminho relativo dentro do ZIP
+      function resolveZipPath(baseDir, relPath) {
+        const cleanRel = relPath.split("#")[0];
+        const stack = baseDir.split("/").filter(Boolean);
+        const parts = cleanRel.split("/");
+        for (const p of parts) {
+          if (p === "." || p === "") continue;
+          if (p === "..") stack.pop();
+          else stack.push(p);
+        }
+        return stack.join("/");
+      }
+
+      // 4. Extrair Imagem de Capa (Data URL) se existir
+      let coverImageBase64 = null;
+      if (coverItemId && manifestItems[coverItemId]) {
+        const coverFullPath = resolveZipPath(opfDir, manifestItems[coverItemId].href);
+        const coverZipObj = zip.file(coverFullPath);
+        if (coverZipObj) {
+          const b64 = await coverZipObj.async("base64");
+          const mime = manifestItems[coverItemId].mediaType || "image/jpeg";
+          coverImageBase64 = `data:${mime};base64,${b64}`;
+        }
+      }
+
+      // 5. Extrair títulos do Sumário (NCX ou Nav XHTML) para nomear os capítulos
+      const tocMap = {};
+      const ncxItem = Object.values(manifestItems).find(i => i.mediaType === "application/x-dtbncx+xml");
+      if (ncxItem) {
+        const ncxPath = resolveZipPath(opfDir, ncxItem.href);
+        const ncxZipObj = zip.file(ncxPath);
+        if (ncxZipObj) {
+          const ncxStr = await ncxZipObj.async("string");
+          const ncxDoc = parser.parseFromString(ncxStr, "application/xml");
+          ncxDoc.querySelectorAll("navPoint").forEach(np => {
+            const label = np.querySelector("navLabel > text")?.textContent?.trim();
+            const src = np.querySelector("content")?.getAttribute("src");
+            if (label && src) {
+              const cleanSrc = decodeURIComponent(src.split("#")[0]);
+              const fullTarget = resolveZipPath(opfDir, cleanSrc);
+              if (!tocMap[fullTarget]) tocMap[fullTarget] = label;
+            }
+          });
+        }
+      }
+
+      // 6. Ler a espinha dorsal (Spine) na ordem exata de leitura
+      const spineRefs = opfDoc.querySelectorAll("spine > itemref");
+      const chapters = [];
+      const imageCache = {}; // Cache de imagens embutidas nos capítulos
+
+      async function getEmbeddedImage(imgFullPath) {
+        if (imageCache[imgFullPath]) return imageCache[imgFullPath];
+        const imgZipObj = zip.file(imgFullPath);
+        if (!imgZipObj) return null;
+        const ext = imgFullPath.split('.').pop().toLowerCase();
+        const mimeMap = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', svg: 'image/svg+xml', webp: 'image/webp' };
+        const mime = mimeMap[ext] || 'image/jpeg';
+        const b64 = await imgZipObj.async("base64");
+        const dataUrl = `data:${mime};base64,${b64}`;
+        imageCache[imgFullPath] = dataUrl;
+        return dataUrl;
+      }
+
+      let chapCounter = 1;
+      for (const ref of spineRefs) {
+        const idref = ref.getAttribute("idref");
+        const item = manifestItems[idref];
+        if (!item) continue;
+
+        const chapterPath = resolveZipPath(opfDir, item.href);
+        const chapterZipObj = zip.file(chapterPath);
+        if (!chapterZipObj) continue;
+
+        const chapterDir = chapterPath.includes("/") ? chapterPath.substring(0, chapterPath.lastIndexOf("/") + 1) : "";
+        const xhtmlString = await chapterZipObj.async("string");
+        const chapDoc = parser.parseFromString(xhtmlString, "text/html");
+
+        if (!chapDoc.body) continue;
+
+        // Remove scripts/styles externos que possam conflitar
+        chapDoc.body.querySelectorAll("script, link, style").forEach(el => el.remove());
+
+        // Converte imagens internas do EPUB (<img src="...">) para Data URLs
+        const imgs = chapDoc.body.querySelectorAll("img, image");
+        for (const imgEl of imgs) {
+          const srcAttr = imgEl.getAttribute("src") || imgEl.getAttribute("xlink:href") || imgEl.getAttribute("href");
+          if (srcAttr && !srcAttr.startsWith("http") && !srcAttr.startsWith("data:")) {
+            const imgFullPath = resolveZipPath(chapterDir, decodeURIComponent(srcAttr));
+            const dataUrl = await getEmbeddedImage(imgFullPath);
+            if (dataUrl) {
+              imgEl.setAttribute("src", dataUrl);
+              if (imgEl.tagName.toLowerCase() === 'image') {
+                imgEl.setAttribute("href", dataUrl);
+              }
+            }
+          }
+        }
+
+        // Remove links locais quebrados mantendo o texto
+        chapDoc.body.querySelectorAll("a").forEach(a => {
+          const href = a.getAttribute("href");
+          if (href && !href.startsWith("http")) {
+            a.removeAttribute("href");
+          }
+        });
+
+        const headingEl = chapDoc.body.querySelector("h1, h2, h3");
+        const detectedTitle = tocMap[chapterPath] || (headingEl ? headingEl.textContent.trim() : `Capítulo ${chapCounter}`);
+        const innerHtml = chapDoc.body.innerHTML.trim();
+
+        // Ignora arquivos vazios sem texto nem imagens
+        if (chapDoc.body.textContent.trim().length > 0 || imgs.length > 0) {
+          chapters.push({
+            chapterTitle: detectedTitle || `Capítulo ${chapCounter}`,
+            content: innerHtml
+          });
+          chapCounter++;
+        }
+      }
+
+      if (chapters.length === 0) {
+        throw new Error("Não foi possível extrair conteúdo legível deste EPUB.");
+      }
+
+      return {
+        id: 'book-epub-' + Date.now(),
+        title: bookTitle,
+        author: bookAuthor,
+        coverBg: 'linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%)',
+        coverImage: coverImageBase64,
+        textColor: '#ffffff',
+        badge: 'EPUB',
+        format: 'epub',
+        lastReadPage: 0,
+        totalPages: chapters.length,
+        dateAdded: Date.now(),
+        chapters: chapters
+      };
+    }
+
+    /* =====================================================================
+       MOTOR DE LEITURA DE ARQUIVOS PDF (.pdf via PDF.js)
+       ===================================================================== */
+    async function parsePdfFile(file) {
+      if (!window.pdfjsLib) {
+        throw new Error("Biblioteca PDF.js não carregada.");
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfBytes = new Uint8Array(arrayBuffer);
+
+      const loadingTask = pdfjsLib.getDocument({ data: pdfBytes.slice(0) });
+      const pdfDoc = await loadingTask.promise;
+
+      // Extrair Metadados
+      let metaTitle = file.name.replace(/\.pdf$/i, "");
+      let metaAuthor = "Documento PDF";
+      try {
+        const meta = await pdfDoc.getMetadata();
+        if (meta && meta.info) {
+          if (meta.info.Title && meta.info.Title.trim()) metaTitle = meta.info.Title.trim();
+          if (meta.info.Author && meta.info.Author.trim()) metaAuthor = meta.info.Author.trim();
+        }
+      } catch (e) { /* ignora erro de metadados */ }
+
+      // Gerar Miniatura da Capa (Página 1)
+      let coverImageBase64 = null;
+      try {
+        const page1 = await pdfDoc.getPage(1);
+        const viewport = page1.getViewport({ scale: 0.6 });
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = viewport.width;
+        tempCanvas.height = viewport.height;
+        await page1.render({ canvasContext: tempCanvas.getContext('2d'), viewport }).promise;
+        coverImageBase64 = tempCanvas.toDataURL('image/jpeg', 0.8);
+      } catch (e) { /* ignora erro de thumbnail */ }
+
+      // Extrair texto de cada página (para o Modo Reflow, Busca, Marcadores e Destaques)
+      const chapters = [];
+      const numPages = pdfDoc.numPages;
+
+      for (let p = 1; p <= numPages; p++) {
+        loadingSubtitle.textContent = `Extraindo página ${p} de ${numPages}...`;
+        const page = await pdfDoc.getPage(p);
+        const textContent = await page.getTextContent();
+
+        // Agrupa itens de texto por linha (coordenada Y aproximada)
+        let lastY = null;
+        let pageHtml = `<h3 class="text-xs uppercase tracking-widest opacity-50 mb-4 border-b border-[var(--theme-border)] pb-1">Página ${p} de ${numPages}</h3><p class="mb-4">`;
+
+        for (const item of textContent.items) {
+          const y = Math.round(item.transform[5]);
+          if (lastY !== null && Math.abs(y - lastY) > 14) {
+            pageHtml += `</p><p class="mb-4">`;
+          } else if (lastY !== null && Math.abs(y - lastY) > 4) {
+            pageHtml += ` `;
+          }
+          pageHtml += escapeHtml(item.str);
+          lastY = y;
+        }
+        pageHtml += `</p>`;
+
+        if (textContent.items.length === 0) {
+          pageHtml = `<div class="text-center py-12 opacity-60"><i class="fa-solid fa-image text-3xl mb-2"></i><p class="text-sm">Página ${p} contém apenas imagens ou digitalização.</p><p class="text-xs mt-1">Use o botão <strong>"Modo PDF"</strong> no menu superior para visualizar a página original.</p></div>`;
+        }
+
+        chapters.push({
+          chapterTitle: `Página ${p}`,
+          content: pageHtml
+        });
+      }
+
+      return {
+        id: 'book-pdf-' + Date.now(),
+        title: metaTitle,
+        author: metaAuthor,
+        coverBg: 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%)',
+        coverImage: coverImageBase64,
+        textColor: '#ffffff',
+        badge: 'PDF',
+        format: 'pdf',
+        pdfData: pdfBytes, // Armazenado no IndexedDB para renderização fiel em Canvas
+        lastReadPage: 0,
+        totalPages: numPages,
+        dateAdded: Date.now(),
+        chapters: chapters
+      };
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    /* ================= Configuração de Eventos ================= */
+    function setupEventListeners() {
+      btnBackToShelf.addEventListener('click', returnToBookshelf);
+
+      shelfSearchInput.addEventListener('input', renderBookshelf);
+      shelfSortSelect.addEventListener('change', renderBookshelf);
+
+      btnOpenAddBook.addEventListener('click', () => addBookModal.classList.remove('hidden'));
+      closeAddBookBtn.addEventListener('click', () => addBookModal.classList.add('hidden'));
+
+      document.querySelectorAll('.cover-color-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.cover-color-btn').forEach(b => b.classList.replace('border-white/60', 'border-transparent'));
+          btn.classList.replace('border-transparent', 'border-white/60');
+          state.selectedCoverColor = btn.getAttribute('data-cover-color');
+        });
+      });
+
+      document.getElementById('btnCreateCustomBook').addEventListener('click', handleCreateCustomBook);
+      document.getElementById('shelfFileInput').addEventListener('change', (e) => {
+        if (e.target.files[0]) {
+          processImportedFile(e.target.files[0]);
+          e.target.value = '';
+        }
+      });
+
+      // Alternar modo de exibição do PDF (Página Original vs Reflow de Texto)
+      btnTogglePdfMode.addEventListener('click', async () => {
+        if (!state.currentBook || state.currentBook.format !== 'pdf') return;
+        const ratio = state.totalPages > 1 ? state.currentPage / (state.totalPages - 1) : 0;
+        state.pdfRenderMode = state.pdfRenderMode === 'canvas' ? 'reflow' : 'canvas';
+        pdfModeLabel.textContent = state.pdfRenderMode === 'canvas' ? 'Modo Texto' : 'Página PDF';
+        state.loadedChapterIndex = -1;
+        await rebuildResponsivePages(ratio);
+        await renderCurrentPage(false);
+        showToast(state.pdfRenderMode === 'canvas' ? 'Exibindo página original do PDF' : 'Exibindo texto extraído (Reflow)');
+      });
+
+      // Alternar modo Livro Aberto (2 Páginas) vs Página Única
+      if (btnToggleSpread) {
+        btnToggleSpread.addEventListener('click', async () => {
+          const currentTwo = computeIsTwoPageSpread();
+          state.spreadPreference = currentTwo ? 'single' : 'double';
+          localStorage.setItem('lumina_spread', state.spreadPreference);
+          const ratio = state.totalPages > 1 ? state.currentPage / (state.totalPages - 1) : 0;
+          state.loadedChapterIndex = -1;
+          await rebuildResponsivePages(ratio);
+          await renderCurrentPage(false);
+          showToast(state.isTwoPageSpread ? 'Modo Livro Aberto (2 páginas)' : 'Modo Página Única');
+        });
+      }
+
+      // Toques na Folha para Folhear e Menu
+      document.getElementById('tapLeft').addEventListener('click', () => turnPage(-1));
+      document.getElementById('tapRight').addEventListener('click', () => turnPage(1));
+      document.getElementById('tapCenter').addEventListener('click', toggleUI);
+
+      // Botões Laterais Flutuantes
+      document.getElementById('prevFloatingBtn').addEventListener('click', () => turnPage(-1));
+      document.getElementById('nextFloatingBtn').addEventListener('click', () => turnPage(1));
+      document.getElementById('stepPrevBtn').addEventListener('click', () => turnPage(-1));
+      document.getElementById('stepNextBtn').addEventListener('click', () => turnPage(1));
+
+      // Slider de Página
+      pageSlider.addEventListener('input', async (e) => {
+        const targetPage = parseInt(e.target.value, 10) - 1;
+        if (targetPage !== state.currentPage) {
+          state.currentPage = targetPage;
+          await renderCurrentPage(false);
+        }
+      });
+
+      // Alternar Tela Cheia
+      document.getElementById('btnToggleFullscreen').addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      // Teclado para Navegação (Desktop)
+      window.addEventListener('keydown', (e) => {
+        if (!bookshelfView.classList.contains('hidden')) return;
+        if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+          turnPage(1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          turnPage(-1);
+        } else if (e.key === 'Escape') {
+          hideAllModals();
+          setUIVisibility(false);
+        }
+      });
+
+      // Suporte a Gesto Swipe em Mobile
+      let touchStartX = 0;
+      let touchEndX = 0;
+      pageSheet.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      pageSheet.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const threshold = 60;
+        if (touchEndX < touchStartX - threshold) {
+          turnPage(1); // Swipe esquerdo -> próxima página
+        } else if (touchEndX > touchStartX + threshold) {
+          turnPage(-1); // Swipe direito -> página anterior
+        }
+      }, { passive: true });
+
+      // Redimensionamento da janela recalcula paginação responsiva 100% ajustada à tela
+      let resizeTimer = null;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(async () => {
+          if (!bookshelfView.classList.contains('hidden')) {
+            renderBookshelf();
+          } else if (state.currentBook) {
+            const ratio = state.totalPages > 1 ? state.currentPage / (state.totalPages - 1) : 0;
+            state.loadedChapterIndex = -1;
+            await rebuildResponsivePages(ratio);
+            await renderCurrentPage(false);
+          }
+        }, 120);
+      });
+
+      document.getElementById('btnToggleBookmark').addEventListener('click', toggleBookmark);
+
+      document.getElementById('btnSettings').addEventListener('click', () => openModal('settingsModal'));
+      document.getElementById('closeSettingsBtn').addEventListener('click', () => closeModal('settingsModal'));
+
+      document.getElementById('btnBookmarksList').addEventListener('click', () => {
+        openModal('bookmarksModal');
+        renderBookmarksList();
+      });
+      document.getElementById('closeBookmarksBtn').addEventListener('click', () => closeModal('bookmarksModal'));
+
+      document.getElementById('btnChapters').addEventListener('click', () => {
+        openModal('chaptersModal');
+        renderChaptersList();
+      });
+      document.getElementById('closeChaptersBtn').addEventListener('click', () => closeModal('chaptersModal'));
+
+      setupModalControls();
+      setupTextHighlighter();
+    }
+
+    /* ================= Suporte Drag & Drop na Estante ================= */
+    function setupDragAndDrop() {
+      let dragCounter = 0;
+
+      bookshelfView.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        dragCounter++;
+        dropZoneOverlay.classList.remove('hidden');
+      });
+
+      bookshelfView.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dragCounter--;
+        if (dragCounter <= 0) {
+          dragCounter = 0;
+          dropZoneOverlay.classList.add('hidden');
+        }
+      });
+
+      bookshelfView.addEventListener('dragover', (e) => {
+        e.preventDefault();
+      });
+
+      bookshelfView.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragCounter = 0;
+        dropZoneOverlay.classList.add('hidden');
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          processImportedFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    /* ================= Criação e Importação Unificada de Livros ================= */
+    async function handleCreateCustomBook() {
+      const title = document.getElementById('newBookTitle').value.trim();
+      const author = document.getElementById('newBookAuthor').value.trim() || 'Autor Desconhecido';
+
+      if (!title) {
+        showToast("Digite o título do livro.");
+        return;
+      }
+
+      const newBook = {
+        id: 'book-' + Date.now(),
+        title: title,
+        author: author,
+        coverBg: `linear-gradient(135deg, ${state.selectedCoverColor} 0%, #000 100%)`,
+        coverImage: null,
+        textColor: '#ffffff',
+        badge: 'Notas',
+        format: 'html',
+        lastReadPage: 0,
+        totalPages: 2,
+        dateAdded: Date.now(),
+        chapters: [
+          {
+            chapterTitle: "Capítulo 1: Introdução",
+            content: `
+              <h2 class="text-xl sm:text-2xl font-bold mb-4">${title}</h2>
+              <p class="mb-4">Este é o início de sua obra personalizada criada no Lumina Moon+ Reader.</p>
+              <p>Adicione textos, anotações ou equações como $E = mc^2$ para testar a renderização.</p>
+            `
+          },
+          {
+            chapterTitle: "Capítulo 2: Desenvolvimento",
+            content: `
+              <h2 class="text-xl sm:text-2xl font-bold mb-4">Capítulo 2</h2>
+              <p>Página complementar pronta para leitura e anotações com marca-texto.</p>
+            `
+          }
+        ]
+      };
+
+      state.library.unshift(newBook);
+      await saveBookToDB(newBook);
+      renderBookshelf();
+
+      document.getElementById('newBookTitle').value = '';
+      document.getElementById('newBookAuthor').value = '';
+      addBookModal.classList.add('hidden');
+      showToast(`Livro "${title}" colocado na estante!`);
+    }
+
+    async function processImportedFile(file) {
+      const fileName = file.name.toLowerCase();
+      addBookModal.classList.add('hidden');
+
+      try {
+        let newBook = null;
+
+        if (fileName.endsWith('.epub')) {
+          showLoading('Lendo arquivo EPUB...', 'Descompactando capítulos, sumário e capa');
+          newBook = await parseEpubFile(file);
+        } else if (fileName.endsWith('.pdf')) {
+          showLoading('Lendo arquivo PDF...', 'Renderizando capa e indexando páginas');
+          newBook = await parsePdfFile(file);
+        } else if (fileName.endsWith('.html') || fileName.endsWith('.htm') || fileName.endsWith('.txt')) {
+          showLoading('Importando texto...', 'Organizando capítulos e paginação');
+          const rawContent = await file.text();
+          let pages = [];
+          if (fileName.endsWith('.html') || fileName.endsWith('.htm')) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(rawContent, 'text/html');
+            pages = splitContentIntoPages(doc.body.innerHTML, file.name, false);
+          } else {
+            pages = splitContentIntoPages(rawContent, file.name, true);
+          }
+
+          if (pages.length > 0) {
+            const cleanTitle = file.name.replace(/\.[^/.]+$/, "");
+            newBook = {
+              id: 'book-' + Date.now(),
+              title: cleanTitle,
+              author: 'Arquivo Importado',
+              coverBg: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+              coverImage: null,
+              textColor: '#f8fafc',
+              badge: file.name.split('.').pop().toUpperCase(),
+              format: 'html',
+              lastReadPage: 0,
+              totalPages: pages.length,
+              dateAdded: Date.now(),
+              chapters: pages
+            };
+          }
+        } else {
+          showToast("Formato não suportado. Use EPUB, PDF, HTML ou TXT.");
+          return;
+        }
+
+        if (newBook) {
+          state.library.unshift(newBook);
+          await saveBookToDB(newBook);
+          renderBookshelf();
+          hideLoading();
+          showToast(`"${newBook.title}" adicionado! (${newBook.totalPages} págs/caps)`);
+        } else {
+          hideLoading();
+          showToast("Arquivo vazio ou não pôde ser lido.");
+        }
+      } catch (err) {
+        hideLoading();
+        console.error("Erro na importação:", err);
+        showToast("Erro ao ler arquivo: " + (err.message || "formato inválido"));
+      }
+    }
+
+    function splitContentIntoPages(content, filename, isPlainText = false) {
+      const pages = [];
+      const pageSizeLimit = 2200;
+
+      if (isPlainText) {
+        const paragraphs = content.split(/\n\s*\n/);
+        let currentChunk = '';
+        let pageNum = 1;
+
+        paragraphs.forEach(p => {
+          if ((currentChunk.length + p.length) > pageSizeLimit && currentChunk.length > 0) {
+            pages.push({
+              chapterTitle: `${filename} - Parte ${pageNum++}`,
+              content: currentChunk
+            });
+            currentChunk = '';
+          }
+          currentChunk += `<p class="mb-4">${escapeHtml(p).replace(/\n/g, '<br>')}</p>`;
+        });
+
+        if (currentChunk.trim().length > 0) {
+          pages.push({
+            chapterTitle: `${filename} - Parte ${pageNum}`,
+            content: currentChunk
+          });
+        }
+      } else {
+        const sections = content.split(/<h[12][^>]*>/i);
+        if (sections.length > 1) {
+          sections.forEach((sec, idx) => {
+            if (sec.trim()) {
+              pages.push({
+                chapterTitle: `Seção ${idx + 1}`,
+                content: `<h2 class="text-xl font-bold mb-4">Seção ${idx + 1}</h2>` + sec
+              });
+            }
+          });
+        } else {
+          let i = 0;
+          let pIdx = 1;
+          while (i < content.length) {
+            pages.push({
+              chapterTitle: `Página ${pIdx++}`,
+              content: content.slice(i, i + pageSizeLimit)
+            });
+            i += pageSizeLimit;
+          }
+        }
+      }
+
+      return pages;
+    }
+
+    /* ================= Controle de Menus (UI) ================= */
+    function toggleUI() {
+      setUIVisibility(!state.uiVisible);
+    }
+
+    function setUIVisibility(visible) {
+      state.uiVisible = visible;
+      if (visible) {
+        topBar.classList.remove('-translate-y-full');
+        bottomBar.classList.remove('translate-y-full');
+      } else {
+        topBar.classList.add('-translate-y-full');
+        bottomBar.classList.add('translate-y-full');
+        highlightToolbar.classList.add('hidden');
+      }
+    }
+
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.remove('hidden');
+      setUIVisibility(false);
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    function hideAllModals() {
+      document.querySelectorAll('#settingsModal, #bookmarksModal, #chaptersModal, #addBookModal').forEach(el => el.classList.add('hidden'));
+    }
+
+    /* ================= Marcador de Página (Bookmark) ================= */
+    function toggleBookmark() {
+      if (!state.currentBook) return;
+      const pageIndex = state.currentPage;
+      const bookId = state.currentBook.id;
+      const existingIdx = state.bookmarks.findIndex(b => b.bookId === bookId && b.page === pageIndex);
+
+      if (existingIdx >= 0) {
+        state.bookmarks.splice(existingIdx, 1);
+        showToast("Marcador removido desta página.");
+      } else {
+        const rawText = readerContent.innerText.trim() || state.currentBook.chapters[pageIndex].chapterTitle;
+        const snippet = rawText.replace(/<[^>]*>/g, '').slice(0, 75) + '...';
+        state.bookmarks.push({
+          bookId: bookId,
+          page: pageIndex,
+          chapter: state.currentBook.chapters[pageIndex].chapterTitle,
+          snippet: snippet,
+          date: new Date().toLocaleDateString('pt-BR')
+        });
+        showToast("Página marcada com sucesso!");
+      }
+
+      localStorage.setItem('lumina_bookmarks', JSON.stringify(state.bookmarks));
+      updateBookmarkRibbonState();
+      updateBookmarksUI();
+    }
+
+    function updateBookmarkRibbonState() {
+      if (!state.currentBook) return;
+      const isBookmarked = state.bookmarks.some(b => b.bookId === state.currentBook.id && b.page === state.currentPage);
+      if (isBookmarked) {
+        topRibbon.classList.remove('inactive');
+        topRibbon.classList.add('active');
+        sheetRibbon.classList.remove('inactive');
+        sheetRibbon.classList.add('active');
+      } else {
+        topRibbon.classList.remove('active');
+        topRibbon.classList.add('inactive');
+        sheetRibbon.classList.remove('active');
+        sheetRibbon.classList.add('inactive');
+      }
+    }
+
+    function updateBookmarksUI() {
+      const bookId = state.currentBook ? state.currentBook.id : null;
+      const bCount = bookId ? state.bookmarks.filter(b => b.bookId === bookId).length : state.bookmarks.length;
+      const hCount = bookId ? state.highlights.filter(h => h.bookId === bookId).length : state.highlights.length;
+
+      document.getElementById('countBookmarks').textContent = bCount;
+      document.getElementById('countHighlights').textContent = hCount;
+    }
+
+    /* ================= Marcador de Texto (Highlighting) ================= */
+    function setupTextHighlighter() {
+      document.addEventListener('selectionchange', () => {
+        const selection = window.getSelection();
+        if (!selection || selection.isCollapsed || !selection.toString().trim()) {
+          return;
+        }
+
+        if (!readerContent.contains(selection.anchorNode)) {
+          return;
+        }
+
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+
+        if (rect.width > 0 && rect.height > 0) {
+          highlightToolbar.style.top = `${Math.max(12, rect.top - 46)}px`;
+          highlightToolbar.style.left = `${Math.min(window.innerWidth - 220, Math.max(10, rect.left + rect.width / 2 - 100))}px`;
+          highlightToolbar.classList.remove('hidden');
+        }
+      });
+
+      highlightToolbar.querySelectorAll('[data-color]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const color = btn.getAttribute('data-color');
+          applyHighlightToSelection(color);
+        });
+      });
+
+      document.getElementById('btnCopySelection').addEventListener('click', () => {
+        const text = window.getSelection().toString();
+        if (text) {
+          copyToClipboard(text);
+          showToast("Trecho copiado para a área de transferência!");
+          highlightToolbar.classList.add('hidden');
+          window.getSelection().removeAllRanges();
+        }
+      });
+    }
+
+    function applyHighlightToSelection(color) {
+      if (!state.currentBook) return;
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+      const selectedText = selection.toString();
+
+      if (!selectedText.trim()) return;
+
+      const span = document.createElement('span');
+      span.className = `hl-${color}`;
+      span.textContent = selectedText;
+
+      range.deleteContents();
+      range.insertNode(span);
+
+      state.highlights.push({
+        bookId: state.currentBook.id,
+        page: state.currentPage,
+        text: selectedText,
+        color: color,
+        date: new Date().toLocaleDateString('pt-BR')
+      });
+      localStorage.setItem('lumina_highlights', JSON.stringify(state.highlights));
+
+      updateBookmarksUI();
+      highlightToolbar.classList.add('hidden');
+      selection.removeAllRanges();
+      showToast("Texto destacado!");
+    }
+
+    function applyStoredHighlights(bookId, pageIndex) {
+      const pageHighlights = state.highlights.filter(h => h.bookId === bookId && h.page === pageIndex);
+      if (pageHighlights.length === 0) return;
+
+      let html = readerContent.innerHTML;
+      pageHighlights.forEach(hl => {
+        const safeText = hl.text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+        const regex = new RegExp(`(${safeText})`, 'i');
+        html = html.replace(regex, `<span class="hl-${hl.color}">$1</span>`);
+      });
+      readerContent.innerHTML = html;
+    }
+
+    /* ================= Modal de Configurações ================= */
+    function setupModalControls() {
+      const sizeSlider = document.getElementById('fontSizeSlider');
+      const sizeVal = document.getElementById('fontSizeVal');
+
+      const setFontSize = async (size) => {
+        const ratio = state.totalPages > 1 ? state.currentPage / (state.totalPages - 1) : 0;
+        state.fontSize = size;
+        sizeSlider.value = size;
+        sizeVal.textContent = `${size}px`;
+        readerContent.style.fontSize = `${size}px`;
+        localStorage.setItem('lumina_fontsize', size);
+        if (state.currentBook) {
+          state.loadedChapterIndex = -1;
+          await rebuildResponsivePages(ratio);
+          await renderCurrentPage(false);
+        }
+      };
+
+      sizeSlider.addEventListener('input', (e) => setFontSize(parseInt(e.target.value, 10)));
+      document.getElementById('fontIncBtn').addEventListener('click', () => {
+        if (state.fontSize < 32) setFontSize(state.fontSize + 1);
+      });
+      document.getElementById('fontDecBtn').addEventListener('click', () => {
+        if (state.fontSize > 14) setFontSize(state.fontSize - 1);
+      });
+
+      document.querySelectorAll('.font-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const ratio = state.totalPages > 1 ? state.currentPage / (state.totalPages - 1) : 0;
+          const font = btn.getAttribute('data-font');
+          state.fontFamily = font;
+          readerContent.style.fontFamily = font;
+          localStorage.setItem('lumina_fontfamily', font);
+          if (state.currentBook) {
+            state.loadedChapterIndex = -1;
+            await rebuildResponsivePages(ratio);
+            await renderCurrentPage(false);
+          }
+          showToast("Fonte alterada!");
+        });
+      });
+
+      document.querySelectorAll('[data-set-theme]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const newTheme = btn.getAttribute('data-set-theme');
+          state.theme = newTheme;
+          document.body.setAttribute('data-theme', newTheme);
+          localStorage.setItem('lumina_theme', newTheme);
+        });
+      });
+
+      document.getElementById('lineHeightSelect').addEventListener('change', async (e) => {
+        const ratio = state.totalPages > 1 ? state.currentPage / (state.totalPages - 1) : 0;
+        state.lineHeight = e.target.value;
+        readerContent.style.lineHeight = state.lineHeight;
+        if (state.currentBook) {
+          state.loadedChapterIndex = -1;
+          await rebuildResponsivePages(ratio);
+          await renderCurrentPage(false);
+        }
+      });
+
+      document.getElementById('textAlignSelect').addEventListener('change', (e) => {
+        state.textAlign = e.target.value;
+        readerContent.style.textAlign = state.textAlign;
+      });
+
+      const tabBk = document.getElementById('tabBookmarksBtn');
+      const tabHl = document.getElementById('tabHighlightsBtn');
+
+      tabBk.addEventListener('click', () => {
+        tabBk.className = 'text-sm font-bold border-b-2 border-[var(--theme-accent)] pb-1';
+        tabHl.className = 'text-sm font-medium opacity-60 pb-1 hover:opacity-100 transition';
+        renderBookmarksList('bookmarks');
+      });
+
+      tabHl.addEventListener('click', () => {
+        tabHl.className = 'text-sm font-bold border-b-2 border-[var(--theme-accent)] pb-1';
+        tabBk.className = 'text-sm font-medium opacity-60 pb-1 hover:opacity-100 transition';
+        renderBookmarksList('highlights');
+      });
+    }
+
+    /* ================= Listas de Marcadores e Capítulos ================= */
+    function renderBookmarksList(mode = 'bookmarks') {
+      const container = document.getElementById('bookmarksListContainer');
+      container.innerHTML = '';
+      if (!state.currentBook) return;
+
+      const currentBookId = state.currentBook.id;
+
+      if (mode === 'bookmarks') {
+        const bookBookmarks = state.bookmarks.filter(b => b.bookId === currentBookId);
+        if (bookBookmarks.length === 0) {
+          container.innerHTML = '<p class="text-sm opacity-60 text-center py-8">Nenhum marcador salvo neste livro.</p>';
+          return;
+        }
+
+        bookBookmarks.forEach((bm) => {
+          const item = document.createElement('div');
+          item.className = 'p-3 rounded-xl bg-black/5 hover:bg-black/10 transition flex items-center justify-between cursor-pointer border border-[var(--theme-border)]';
+          item.innerHTML = `
+            <div class="truncate mr-3">
+              <h4 class="text-sm font-bold truncate">Página ${bm.page + 1}: ${bm.chapter}</h4>
+              <p class="text-xs opacity-70 truncate italic">"${bm.snippet}"</p>
+              <span class="text-[10px] opacity-50">${bm.date}</span>
+            </div>
+            <button data-remove-bm="${bm.page}" class="p-2 text-red-500 hover:text-red-700 transition" title="Remover">
+              <i class="fa-solid fa-trash-can text-sm"></i>
+            </button>
+          `;
+
+          item.addEventListener('click', async (e) => {
+            if (e.target.closest('[data-remove-bm]')) {
+              e.stopPropagation();
+              const realIdx = state.bookmarks.findIndex(b => b.bookId === currentBookId && b.page === bm.page);
+              if (realIdx >= 0) {
+                state.bookmarks.splice(realIdx, 1);
+                localStorage.setItem('lumina_bookmarks', JSON.stringify(state.bookmarks));
+                renderBookmarksList('bookmarks');
+                updateBookmarkRibbonState();
+                updateBookmarksUI();
+              }
+              return;
+            }
+            state.currentPage = bm.page;
+            await renderCurrentPage();
+            closeModal('bookmarksModal');
+          });
+
+          container.appendChild(item);
+        });
+      } else {
+        const bookHighlights = state.highlights.filter(h => h.bookId === currentBookId);
+        if (bookHighlights.length === 0) {
+          container.innerHTML = '<p class="text-sm opacity-60 text-center py-8">Nenhum texto destacado neste livro.</p>';
+          return;
+        }
+
+        bookHighlights.forEach((hl, idx) => {
+          const item = document.createElement('div');
+          item.className = 'p-3 rounded-xl bg-black/5 hover:bg-black/10 transition flex items-center justify-between cursor-pointer border border-[var(--theme-border)]';
+          item.innerHTML = `
+            <div class="truncate mr-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="w-3 h-3 rounded-full bg-${hl.color}-400"></span>
+                <span class="text-xs font-bold">Página ${hl.page + 1}</span>
+              </div>
+              <p class="text-sm font-serif italic truncate">"${hl.text}"</p>
+              <span class="text-[10px] opacity-50">${hl.date}</span>
+            </div>
+            <button data-remove-hl="${idx}" class="p-2 text-red-500 hover:text-red-700 transition" title="Remover">
+              <i class="fa-solid fa-trash-can text-sm"></i>
+            </button>
+          `;
+
+          item.addEventListener('click', async (e) => {
+            if (e.target.closest('[data-remove-hl]')) {
+              e.stopPropagation();
+              const realIdx = state.highlights.findIndex(h => h.bookId === currentBookId && h.text === hl.text);
+              if (realIdx >= 0) {
+                state.highlights.splice(realIdx, 1);
+                localStorage.setItem('lumina_highlights', JSON.stringify(state.highlights));
+                renderBookmarksList('highlights');
+                await renderCurrentPage(false);
+                updateBookmarksUI();
+              }
+              return;
+            }
+            state.currentPage = hl.page;
+            await renderCurrentPage();
+            closeModal('bookmarksModal');
+          });
+
+          container.appendChild(item);
+        });
+      }
+    }
+
+    function renderChaptersList() {
+      const list = document.getElementById('chaptersList');
+      list.innerHTML = '';
+      if (!state.currentBook) return;
+
+      const currentChapterIdx = state.flatPages[state.currentPage]?.chapterIndex ?? 0;
+
+      state.currentBook.chapters.forEach((chapter, idx) => {
+        const firstFlatIdx = state.flatPages.findIndex(p => p.chapterIndex === idx);
+        const targetPageIdx = firstFlatIdx >= 0 ? firstFlatIdx : 0;
+        const btn = document.createElement('button');
+        const isCurrent = idx === currentChapterIdx;
+        btn.className = `w-full text-left p-3 rounded-xl text-sm font-medium transition flex items-center justify-between ${
+          isCurrent 
+            ? 'bg-[var(--theme-accent)] text-white shadow-md' 
+            : 'hover:bg-black/10 border border-[var(--theme-border)]'
+        }`;
+        btn.innerHTML = `
+          <span class="truncate">${chapter.chapterTitle}</span>
+          <span class="text-xs opacity-70 ml-2">Pág. ${targetPageIdx + 1}</span>
+        `;
+        btn.addEventListener('click', async () => {
+          state.currentPage = targetPageIdx;
+          await renderCurrentPage();
+          closeModal('chaptersModal');
+        });
+        list.appendChild(btn);
+      });
+    }
+
+    /* ================= Utilitários ================= */
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toastEl.classList.add('opacity-0', 'pointer-events-none');
+      }, 2600);
+    }
+
+    function copyToClipboard(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        console.error('Falha ao copiar texto:', err);
+      }
+      document.body.removeChild(textarea);
+    }
+  </script>
+</body>
+</html>
