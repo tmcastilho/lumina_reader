@@ -2,7 +2,14 @@
 
 **Single-File Client-Side eReader, Skeuomorphic Wooden Bookshelf, Multi-Format Document Engine (EPUB/PDF/TXT) \& Inline Versioned Editor**
 
-!\[Lumina Reader Preview\](preview.jpg)
+![License: All Rights Reserved](https://img.shields.io/badge/License-All%20Rights%20Reserved-red.svg)
+![HTML5](https://img.shields.io/badge/Markup-HTML5-E34F26?logo=html5&logoColor=white)
+![JavaScript](https://img.shields.io/badge/Front--end-Vanilla%20JS%20(ES2023%2B)-F7DF1E?logo=javascript&logoColor=black)
+![UI/UX](https://img.shields.io/badge/UI%2FUX-Tailwind%20%7C%20Skeuomorphic%20%26%20Paper%20UI-38BDF8?logo=tailwindcss&logoColor=white)
+![Formats](https://img.shields.io/badge/Formats-EPUB%20%7C%20PDF%20%7C%20HTML%20%7C%20TXT-8B5CF6?logo=bookstack&logoColor=white)
+![Storage](https://img.shields.io/badge/Storage-IndexedDB%20%7C%20Offline--First-10B981?logo=databricks&logoColor=white)
+
+![LUMINA folder](folder.jpg)
 
 ---
 
